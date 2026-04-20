@@ -1,0 +1,11 @@
+{
+  "name": "deportes",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:back": "npm run dev -w packages/backend",
+    "dev:front": "npm run dev -w packages/frontend"
+  }
+}

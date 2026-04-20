@@ -1,0 +1,41 @@
+# --- Dependencias ---
+node_modules/
+.pnp
+.pnp.js
+
+# --- Compilación (TS y Producción) ---
+dist/
+build/
+*.tsbuildinfo
+
+# --- Variables de Entorno (¡IMPORTANTE!) ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# --- IDEs y Editores ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- Sistema Operativo ---
+.DS_Store
+Thumbs.db
+
+# --- Otros ---
+coverage/
+.next/
+.cache/
