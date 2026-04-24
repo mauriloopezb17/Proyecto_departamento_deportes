@@ -9,7 +9,12 @@
     "dev:front": "npm run dev -w packages/frontend",
     "dev": "concurrently \"npm run dev:back\" \"npm run dev:front\""
   },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3"
+  },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "@types/jsonwebtoken": "^9.0.10",
+     "concurrently": "^9.2.1"
+
   }
 }

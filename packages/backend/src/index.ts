@@ -3,6 +3,7 @@ import cors from 'cors';
 import passport  from 'passport';
 import './config/passport';
 import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes';
 dotenv.config();
 
 const app = express();
@@ -10,7 +11,9 @@ app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
 
-app.get('/api/auth/google', passport.authenticate('google',{scope: ['profile', 'email']}));
+app.use('/api/auth', authRoutes);
+
+/*app.get('/api/auth/google', passport.authenticate('google',{scope: ['profile', 'email']}));
 
 app.get('/api/auth/google/callback',
   passport.authenticate('google', { session: false }),
@@ -30,7 +33,7 @@ app.get('/api/auth/google/callback',
       res.json(req.user);
     }
   }
-);
+);*/
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

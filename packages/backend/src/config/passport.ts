@@ -9,13 +9,21 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     callbackURL: process.env.CALLBACK_URL,
   },
-  (accessToken, refreshToken, profile, done) => {
+  async (accessToken, refreshToken, profile, done) => {
     const email = profile.emails?.[0].value;
     if (!email?.endsWith('@ucb.edu.bo')) {
       console.log(`[AUTH] Intento de acceso denegado para: ${email}`);
       return done(null, false, { message: 'Solo se permiten correos de la UCB' });
     }
-    const role = 'estudiante'; 
+    
+    // para hacerlo de forma estatica temporal, hasta que haya bd
+    const adminList = process.env.ADMIN_EMAILS?.split(',') || [];
+    let role = 'estudiante'; 
+    if (adminList.includes(email)) {
+      role = 'admin';
+      console.log(`[AUTH] Administrador detectado: ${email}`);
+    }
+
     console.log(`...................logim`);
     console.log(`Usuario: ${profile.displayName}`);
     console.log(`Email: ${email}`);
@@ -31,10 +39,3 @@ passport.use(new GoogleStrategy({
     return done(null, user);
   }
 ));
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-
-passport.deserializeUser((user: any, done) => {
-  done(null, user);
-});
