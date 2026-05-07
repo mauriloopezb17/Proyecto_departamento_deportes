@@ -1,0 +1,395 @@
+.torneos-container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.filters .filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filters select {
+  padding: 8px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  color: var(--text-dark);
+  background-color: white;
+  outline: none;
+}
+
+/* calendar */
+.calendar-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: var(--ucb-blue);
+  color: white;
+}
+
+.cal-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.cal-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--ucb-yellow);
+}
+
+.cal-month {
+  font-size: 1.5rem;
+  margin: 0;
+  color: white;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--border-color);
+  border: 1px solid var(--border-color);
+}
+
+.cal-day-header {
+  background: var(--bg-light);
+  text-align: center;
+  padding: 12px;
+  font-weight: bold;
+  color: var(--text-dark);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.cal-cell {
+  background: white;
+  min-height: 120px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: background 0.3s;
+}
+
+.cal-cell:hover {
+  background: #f8fafc;
+}
+
+.cal-cell.empty {
+  background: #f1f5f9;
+}
+
+.cal-cell.today {
+  background: #fffbeb;
+}
+
+.cal-cell.today .cal-date {
+  background: var(--ucb-yellow);
+  color: var(--ucb-blue);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.cal-date {
+  font-weight: 600;
+  color: var(--text-light);
+  align-self: flex-end;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+.cal-event {
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cal-event.futsal {
+  background: #e0f2fe;
+  color: #0284c7;
+  border-left: 3px solid #0284c7;
+}
+
+.cal-event.basket {
+  background: #ffedd5;
+  color: #ea580c;
+  border-left: 3px solid #ea580c;
+}
+
+.cal-event.voley {
+  background: #fce7f3;
+  color: #db2777;
+  border-left: 3px solid #db2777;
+}
+
+/* tables */
+.table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  overflow-x: auto;
+  margin-bottom: 2rem;
+}
+
+.table-container.rounded-bottom {
+  border-radius: 0 0 8px 8px;
+}
+
+.torneos-container table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.torneos-container th {
+  background-color: var(--ucb-blue);
+  color: white;
+  padding: 15px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.torneos-container td {
+  padding: 15px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-dark);
+}
+
+.torneos-container tr:last-child td {
+  border-bottom: none;
+}
+
+.torneos-container tr:hover td {
+  background-color: #f8fafc;
+}
+
+.torneos-container tr.leader td {
+  border-left: 4px solid var(--ucb-yellow);
+  font-weight: 600;
+}
+
+.torneos-container th.num,
+.torneos-container td.num {
+  text-align: center;
+}
+
+.pts {
+  font-weight: bold;
+  color: var(--ucb-blue);
+  font-size: 1.1rem;
+}
+
+.team-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-logo {
+  width: 30px;
+  height: 30px;
+  background-color: #e2e8f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--text-light);
+}
+
+/* matches */
+.jornada-group {
+  margin-bottom: 2.5rem;
+}
+
+.jornada-title {
+  color: var(--ucb-blue);
+  border-bottom: 2px solid var(--ucb-yellow);
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+  display: inline-block;
+  font-size: 1.2rem;
+}
+
+.match-row {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  margin-bottom: 10px;
+  border-left: 4px solid transparent;
+}
+
+.match-row.played {
+  border-left-color: var(--text-light);
+  opacity: 0.85;
+}
+
+.match-row.upcoming {
+  border-left-color: var(--ucb-yellow);
+}
+
+.match-date {
+  width: 20%;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.match-teams {
+  width: 60%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.team-home {
+  text-align: right;
+  flex: 1;
+}
+
+.team-away {
+  text-align: left;
+  flex: 1;
+}
+
+.score-badge {
+  background: var(--ucb-blue);
+  color: var(--ucb-yellow);
+  padding: 5px 15px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  min-width: 80px;
+  text-align: center;
+}
+
+.time-badge {
+  background: #f1f5f9;
+  color: var(--text-light);
+  padding: 5px 15px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.match-location {
+  width: 20%;
+  text-align: right;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* stats */
+.stats-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+.stats-card-header {
+  background: var(--ucb-blue);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  font-weight: bold;
+}
+
+.stats-card-header.alt {
+  background-color: #334155;
+}
+
+@media (max-width: 768px) {
+  .stats-section-grid {
+    grid-template-columns: 1fr;
+  }
+  .match-row {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  .match-date,
+  .match-location {
+    width: 100%;
+    text-align: center;
+  }
+  .calendar-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: transparent;
+    border: none;
+    padding: 10px;
+  }
+  .cal-day-header {
+    display: none;
+  }
+  .cal-cell {
+    min-height: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+  }
+  .cal-cell.empty {
+    display: none;
+  }
+  .cal-date {
+    align-self: flex-start;
+    font-size: 1.1rem;
+    color: var(--ucb-blue);
+  }
+  .cal-event {
+    white-space: normal;
+  }
+}

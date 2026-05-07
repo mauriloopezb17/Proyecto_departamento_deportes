@@ -1,0 +1,78 @@
+.ucb-nav {
+  background-color: var(--ucb-blue);
+  padding: 1rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.ucb-nav .logo-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--ucb-yellow);
+  text-decoration: none;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.ucb-nav .logo-img {
+  height: 45px;
+  width: auto;
+  transition: transform 0.3s ease;
+}
+
+.ucb-nav .logo-area:hover .logo-img {
+  transform: scale(1.05);
+}
+
+.ucb-nav .nav-links {
+  display: flex;
+  align-items: center;
+}
+
+.ucb-nav .nav-links a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+  transition: color 0.3s;
+  font-weight: 500;
+}
+
+.ucb-nav .nav-links a.active,
+.ucb-nav .nav-links a:hover {
+  color: var(--ucb-yellow);
+}
+
+.ucb-nav .nav-links a.btn-login {
+  background-color: var(--ucb-yellow);
+  color: var(--ucb-blue) !important;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ucb-nav .nav-links a.btn-login:hover {
+  background-color: var(--ucb-yellow-dark);
+}
+
+@media (max-width: 768px) {
+  .ucb-nav {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .ucb-nav .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+  .ucb-nav .nav-links a {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}

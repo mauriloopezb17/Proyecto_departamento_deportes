@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Web UCB Deportes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* --- CORE DESIGN SYSTEM --- */
+        :root {
+            --ucb-blue: #003057;
+            --ucb-yellow: #FFB81C;
+            --bg-light: #F8FAFC;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --hover-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, .logo-area span { font-family: 'Montserrat', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
+
+        /* --- TYPOGRAPHY & UTILITIES --- */
+        .section-title {
+            color: var(--ucb-blue);
+            text-align: center;
+            margin: 4rem 0 2rem 0;
+            font-size: 2rem;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--ucb-yellow);
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+
+        /* --- NAVIGATION --- */
+        nav { background-color: var(--ucb-blue); padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .logo-area { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: bold; color: var(--ucb-yellow); text-decoration: none; }
+        .logo-img { height: 45px; width: auto; transition: transform 0.3s ease; }
+        .logo-area:hover .logo-img { transform: scale(1.05); }
+        .nav-links a { color: white; text-decoration: none; margin-left: 20px; transition: color 0.3s; }
+        .nav-links a.active, .nav-links a:hover { color: var(--ucb-yellow); }
+        .btn-login { background-color: var(--ucb-yellow); color: var(--ucb-blue) !important; padding: 8px 15px; border-radius: 5px; font-weight: bold; }
+
+        /* --- HERO --- */
+        .hero { padding: 5rem 5%; text-align: center; background-color: white; border-bottom: 4px solid var(--ucb-yellow); }
+        .hero h1 { font-size: 2.5rem; color: var(--ucb-blue); margin-bottom: 1rem; }
+        .hero p { color: var(--text-light); max-width: 600px; margin: 0 auto 2.5rem auto; font-size: 1.1rem; }
+        .btn-primary { background-color: var(--ucb-yellow); color: var(--ucb-blue); padding: 12px 30px; text-decoration: none; font-weight: bold; border-radius: 5px; transition: all 0.3s; display: inline-block; }
+        .btn-primary:hover { background-color: #e6a619; transform: translateY(-2px); }
+        .btn-primary i { margin-right: 8px; vertical-align: middle; }
+
+        /* --- MATCH CENTER --- */
+        .match-center { display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 2rem; }
+        .match-panel { flex: 1; min-width: 300px; background: white; padding: 25px; border-radius: 8px; box-shadow: var(--card-shadow); }
+        .match-panel h3 { color: var(--ucb-blue); margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+        
+        .match-card { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; }
+        .match-card:last-child { border-bottom: none; }
+        .team-info { display: flex; align-items: center; gap: 10px; font-weight: 600; width: 40%; }
+        .team-info.away { justify-content: flex-end; text-align: right; }
+        .score-box { background: var(--ucb-blue); color: var(--ucb-yellow); padding: 5px 15px; border-radius: 4px; font-weight: bold; font-size: 1.2rem; text-align: center; }
+        .time-box { background: #f1f5f9; color: var(--text-light); padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; text-align: center; font-weight: bold; }
+        .match-meta { text-align: center; font-size: 0.8rem; color: var(--text-light); margin-bottom: 5px; width: 100%; display: block; }
+
+        /* --- NEWS GRID --- */
+        .news-grid { display: flex; gap: 25px; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+        .news-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: var(--card-shadow); width: 320px; transition: transform 0.3s, box-shadow 0.3s; }
+        .news-card:hover { transform: translateY(-5px); box-shadow: var(--hover-shadow); }
+        .news-img { height: 180px; background: linear-gradient(135deg, #003057 0%, #004a87 100%); display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.2); }
+        .news-img i { width: 64px; height: 64px; }
+        .news-content { padding: 20px; }
+        .news-tag { color: var(--ucb-yellow); font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
+        .news-content h3 { margin: 8px 0; color: var(--ucb-blue); font-size: 1.2rem; }
+
+        /* --- FEATURED PLAYERS --- */
+        .players-grid { display: flex; gap: 25px; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+        .player-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: var(--card-shadow); width: 250px; text-align: center; border-top: 4px solid var(--ucb-blue); transition: all 0.3s; }
+        .player-card:hover { transform: translateY(-5px); border-top-color: var(--ucb-yellow); }
+        .player-photo { height: 200px; background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); display: flex; align-items: center; justify-content: center; color: var(--ucb-blue); }
+        .player-photo i { width: 80px; height: 80px; opacity: 0.5; }
+        .player-info { padding: 20px; }
+        .player-info h4 { color: var(--ucb-blue); font-size: 1.1rem; }
+        .player-sport { color: var(--text-light); font-size: 0.9rem; margin-bottom: 10px; display: block; }
+        .player-stat { font-weight: bold; color: var(--ucb-yellow); font-size: 0.85rem; background: var(--ucb-blue); padding: 3px 8px; border-radius: 12px; display: inline-block; }
+
+        /* --- SECTION MORE LINK --- */
+        .section-footer { text-align: center; margin-bottom: 4rem; }
+        .btn-more { color: var(--ucb-blue); font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; padding: 10px 20px; border: 2px solid transparent; border-radius: 5px; }
+        .btn-more:hover { gap: 12px; color: var(--ucb-yellow); border-color: var(--ucb-yellow); background: var(--ucb-blue); }
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="home.html" class="logo-area">
+            <img src="assets/UCB escudo.png" alt="UCB Escudo" class="logo-img">
+            <span>Gestión Deportiva</span>
+        </a>
+        <div class="nav-links">
+            <a href="home.html" class="active">Inicio</a>
+            <a href="torneos.html">Torneos</a>
+            <a href="club.html">Club</a>
+            <a href="noticias.html">Noticias</a>
+            <a href="inscribete.html">Inscríbete</a>
+            <a href="#" class="btn-login"><i data-lucide="user" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"></i>Inicia Sesión</a>
+
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>El deporte universitario al siguiente nivel.</h1>
+        <p>Únete a las disciplinas, revisa los fixtures en tiempo real y apoya a tu carrera en el torneo oficial de la UCB.</p>
+        <a href="#" class="btn-primary"><i data-lucide="user-plus"></i>Inscríbete Ahora</a>
+    </header>
+
+    <div class="container">
+        
+        <h2 class="section-title">Centro de Partidos</h2>
+        <div class="match-center">
+            <div class="match-panel">
+                <h3>Últimos Resultados</h3>
+                <div class="match-card">
+                    <div class="team-info">Sistemas</div>
+                    <div class="score-box">3 - 1</div>
+                    <div class="team-info away">Derecho</div>
+                </div>
+                <div class="match-card">
+                    <div class="team-info">Arquitectura</div>
+                    <div class="score-box">2 - 2</div>
+                    <div class="team-info away">Medicina</div>
+                </div>
+                <div class="match-card">
+                    <div class="team-info">Administración</div>
+                    <div class="score-box">0 - 1</div>
+                    <div class="team-info away">Ing. Civil</div>
+                </div>
+            </div>
+
+            <div class="match-panel">
+                <h3>Próximos Partidos (Intercarreras)</h3>
+                <div class="match-card" style="flex-wrap: wrap;">
+                    <span class="match-meta">Mañana • Coliseo Principal • Fútsal</span>
+                    <div class="team-info">Sistemas</div>
+                    <div class="time-box">18:30</div>
+                    <div class="team-info away">Mecatrónica</div>
+                </div>
+                <div class="match-card" style="flex-wrap: wrap;">
+                    <span class="match-meta">Viernes • Cancha Arq. • Básquetbol</span>
+                    <div class="team-info">Diseño</div>
+                    <div class="time-box">19:45</div>
+                    <div class="team-info away">Comunicación</div>
+                </div>
+            </div>
+        </div>
+        <div class="section-footer">
+            <a href="torneos.html" class="btn-more">Ver fixture y más información <i data-lucide="arrow-right"></i></a>
+        </div>
+
+        <h2 class="section-title">Noticias del Club</h2>
+        <section class="news-grid">
+            <article class="news-card">
+                <div class="news-img"><i data-lucide="trophy"></i></div>
+                <div class="news-content">
+                    <span class="news-tag">Intercarreras</span>
+                    <h3>Sistemas clasifica a la final</h3>
+                    <p>El equipo de Ingeniería de Sistemas aseguró su pase a la final tras un agónico partido que se definió en penales.</p>
+                </div>
+            </article>
+            <article class="news-card">
+                <div class="news-img"><i data-lucide="calendar"></i></div>
+                <div class="news-content">
+                    <span class="news-tag">Avisos</span>
+                    <h3>Nuevos horarios de Voleibol</h3>
+                    <p>Atención a todas las categorías, los entrenamientos se trasladan al coliseo principal.</p>
+                </div>
+            </article>
+            <article class="news-card">
+                <div class="news-img"><i data-lucide="medal"></i></div>
+                <div class="news-content">
+                    <span class="news-tag">Logros</span>
+                    <h3>Medalla de oro en Nacionales</h3>
+                    <p>Nuestros representantes de Taekwondo traen el oro a casa en la última competencia.</p>
+                </div>
+            </article>
+        </section>
+        <div class="section-footer">
+            <a href="noticias.html" class="btn-more">Ver todas las noticias <i data-lucide="arrow-right"></i></a>
+        </div>
+
+        <h2 class="section-title">Jugadores Destacados</h2>
+        <section class="players-grid">
+            <article class="player-card">
+                <div class="player-photo"><i data-lucide="user"></i></div>
+                <div class="player-info">
+                    <h4>Alejandro Mendoza</h4>
+                    <span class="player-sport">Fútsal - Sistemas</span>
+                    <span class="player-stat">Goleador del Torneo</span>
+                </div>
+            </article>
+            <article class="player-card">
+                <div class="player-photo"><i data-lucide="user"></i></div>
+                <div class="player-info">
+                    <h4>Camila Vargas</h4>
+                    <span class="player-sport">Básquetbol - Derecho</span>
+                    <span class="player-stat">MVP Semestral</span>
+                </div>
+            </article>
+            <article class="player-card">
+                <div class="player-photo"><i data-lucide="user"></i></div>
+                <div class="player-info">
+                    <h4>Diego Rojas</h4>
+                    <span class="player-sport">Ajedrez - Civil</span>
+                    <span class="player-stat">Campeón Nacional</span>
+                </div>
+            </article>
+        </section>
+        <div class="section-footer">
+            <a href="club.html" class="btn-more">Conoce más sobre el club <i data-lucide="arrow-right"></i></a>
+        </div>
+
+    </div>
+
+    <footer style="background-color: var(--ucb-blue); color: white; padding: 3rem 5%; margin-top: 4rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <img src="assets/UCB logo horizontal blanco.png" alt="UCB Logo" style="height: 60px;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Montserrat', sans-serif;">UCB Deportes</h3>
+                    <p style="margin: 5px 0 0 0; color: #cbd5e1; font-size: 0.9rem;">Excelencia y Valores.</p>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <p>&copy; 2026 Universidad Católica Boliviana "San Pablo"</p>
+                <p style="color: #cbd5e1; font-size: 0.9rem;">Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
