@@ -35,12 +35,12 @@ app.get('/api/auth/google/callback',
   }
 );*/
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`ados corriendose en http://localhost:${PORT}`);
   console.log(`OAuth2 para @ucb.edu.bo`);
 });
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send('cristo viene');
 });
 
