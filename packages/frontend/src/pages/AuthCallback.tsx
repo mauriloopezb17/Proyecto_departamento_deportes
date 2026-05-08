@@ -20,7 +20,7 @@ function AuthCallback() {
   }, [navigate])
 
   return (
-    <div style={{ padding: '4rem', textAlign: 'center', color: '#003057' }}>
+    <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--ucb-blue)' }}>
       Completando inicio de sesión...
     </div>
   )

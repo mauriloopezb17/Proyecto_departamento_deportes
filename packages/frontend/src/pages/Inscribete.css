@@ -97,7 +97,7 @@
 }
 
 .req-icon-side {
-  color: #e2e8f0;
+  color: var(--border-color);
   flex-shrink: 0;
 }
 

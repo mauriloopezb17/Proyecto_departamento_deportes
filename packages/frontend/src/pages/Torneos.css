@@ -100,7 +100,7 @@
 }
 
 .cal-cell:hover {
-  background: #f8fafc;
+  background: var(--bg-light);
 }
 
 .cal-cell.empty {
@@ -203,7 +203,7 @@
 }
 
 .torneos-container tr:hover td {
-  background-color: #f8fafc;
+  background-color: var(--bg-light);
 }
 
 .torneos-container tr.leader td {
@@ -231,7 +231,7 @@
 .team-logo {
   width: 30px;
   height: 30px;
-  background-color: #e2e8f0;
+  background-color: var(--border-color);
   border-radius: 50%;
   display: flex;
   align-items: center;

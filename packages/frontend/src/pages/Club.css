@@ -40,7 +40,7 @@
   border-radius: 6px;
   font-size: 1rem;
   color: var(--text-dark);
-  background-color: #f8fafc;
+  background-color: var(--bg-light);
 }
 
 .search-area input:focus {
@@ -99,7 +99,7 @@
 .player-top {
   position: relative;
   height: 180px;
-  background: linear-gradient(135deg, var(--ucb-blue) 0%, #004a87 100%);
+  background: linear-gradient(135deg, var(--ucb-blue) 0%, var(--ucb-blue-light) 100%);
   display: flex;
   align-items: center;
   padding: 25px;
