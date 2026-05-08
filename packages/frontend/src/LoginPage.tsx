@@ -35,7 +35,7 @@ function LoginPage() {
     <div className="login-page">
       {/* barra dorada de arriba */}
       <div className="login-topbar">
-        <img src="/escudo.png" alt="UCB" className="topbar-logo" />
+        <img src="/ucb-assets/UCB%20escudo.png" alt="UCB" className="topbar-logo" />
       </div>
 
       {/* contenido central */}
@@ -44,7 +44,7 @@ function LoginPage() {
           {/* encabezado con logo */}
           <div className="login-header">
             <img
-              src="/escudo.png"
+              src="/ucb-assets/UCB%20escudo.png"
               alt="Universidad Católica Boliviana"
               className="login-logo"
             />

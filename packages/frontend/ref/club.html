@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club - Portal Web UCB Deportes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* --- CORE DESIGN SYSTEM --- */
+        :root {
+            --ucb-blue: #003057;
+            --ucb-yellow: #FFB81C;
+            --bg-light: #F8FAFC;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --hover-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, .logo-area span { font-family: 'Montserrat', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
+
+        /* --- NAVIGATION --- */
+        nav { background-color: var(--ucb-blue); padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .logo-area { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: bold; color: var(--ucb-yellow); text-decoration: none; }
+        .logo-img { height: 45px; width: auto; transition: transform 0.3s ease; }
+        .logo-area:hover .logo-img { transform: scale(1.05); }
+        .nav-links a { color: white; text-decoration: none; margin-left: 20px; transition: color 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--ucb-yellow); }
+        .btn-login { background-color: var(--ucb-yellow); color: var(--ucb-blue) !important; padding: 8px 15px; border-radius: 5px; font-weight: bold; }
+
+        /* --- PAGE HEADER --- */
+        .page-header { background-color: white; padding: 3rem 5% 2rem; border-bottom: 4px solid var(--ucb-yellow); text-align: center; }
+        .page-header h1 { color: var(--ucb-blue); font-size: 2.2rem; margin-bottom: 0.5rem; }
+        .page-header p { color: var(--text-light); font-size: 1.1rem; }
+
+        /* --- LAYOUT CONTAINER --- */
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 5%; }
+
+        /* --- TABS --- */
+        .tabs { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 2rem; justify-content: center;}
+        .tab { padding: 10px 25px; cursor: pointer; font-weight: 600; color: var(--text-light); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.3s; }
+        .tab:hover { color: var(--ucb-blue); }
+        .tab.active { color: var(--ucb-blue); border-bottom-color: var(--ucb-yellow); }
+
+        /* --- ROSTER FILTERS --- */
+        .roster-filters { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 8px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); margin-bottom: 2rem; flex-wrap: wrap; gap: 15px;}
+        .search-area { flex-grow: 1; min-width: 250px; position: relative; }
+        .search-area input { width: 100%; padding: 10px 15px 10px 40px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; color: var(--text-dark); background-color: #f8fafc; }
+        .search-area i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light); width: 18px; }
+        .search-area input:focus { border-color: var(--ucb-blue); outline: none;}
+
+        .filter-group { display: flex; align-items: center; gap: 10px; }
+        .filter-group select { padding: 8px 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; color: var(--text-dark); background-color: white; cursor: pointer; outline: none;}
+
+        /* --- PLAYER PROFILE CARDS --- */
+        .players-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 30px; margin-bottom: 4rem; }
+        .player-card { background: white; border-radius: 12px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s, box-shadow 0.3s; }
+        .player-card:hover { transform: translateY(-5px); box-shadow: var(--hover-shadow); }
+
+        .player-top { position: relative; height: 180px; background: linear-gradient(135deg, var(--ucb-blue) 0%, #004a87 100%); display: flex; align-items: center; padding: 25px; color: white; gap: 20px; border-bottom: 4px solid var(--ucb-yellow); }
+        .player-photo { width: 100px; height: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+        .player-photo i { width: 60px; height: 60px; opacity: 0.8; }
+        
+        .player-header-info h3 { font-size: 1.5rem; margin-bottom: 5px; }
+        .player-sport { color: var(--ucb-yellow); font-weight: bold; font-size: 0.9rem; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .player-position { color: rgba(255,255,255,0.8); font-size: 0.9rem; background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 12px; display: inline-block; }
+
+        .player-content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
+        .player-vitals { display: flex; gap: 15px; flex-wrap: wrap; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;}
+        .vital-item { flex: 1; text-align: center; background: var(--bg-light); padding: 10px; border-radius: 8px; min-width: 70px; border: 1px solid #edf2f7; }
+        .vital-label { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px; }
+        .vital-value { font-size: 1rem; color: var(--ucb-blue); font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .vital-value i { width: 14px; height: 14px; color: var(--text-light); }
+
+        .stats-header { color: var(--ucb-blue); font-weight: bold; margin-bottom: 10px; font-size: 1rem; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; text-align: center; }
+        .stat-item { background: var(--ucb-blue); color: white; padding: 10px 5px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .stat-label { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; display: block; color: rgba(255,255,255,0.8); margin-bottom: 2px; }
+        .stat-value { font-size: 1.2rem; font-weight: bold; color: var(--ucb-yellow); }
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="home.html" class="logo-area">
+            <img src="assets/UCB escudo.png" alt="UCB Escudo" class="logo-img">
+            <span>Gestión Deportiva</span>
+        </a>
+        <div class="nav-links">
+            <a href="home.html">Inicio</a>
+            <a href="torneos.html">Torneos</a>
+            <a href="club.html" class="active">Club</a>
+            <a href="noticias.html">Noticias</a>
+            <a href="inscribete.html">Inscríbete</a>
+            <a href="#" class="btn-login"><i data-lucide="user" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"></i>Inicia Sesión</a>
+
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <h1>Conoce a tu Club</h1>
+        <p>Nuestro roster oficial, cuerpo técnico, horarios y los mejores momentos de nuestros atletas.</p>
+    </header>
+
+    <div class="container">
+
+        <div class="tabs" id="clubTabs">
+            <div class="tab" data-target="tab-horarios">Horarios</div>
+            <div class="tab" data-target="tab-entrenadores">Cuerpo Técnico</div>
+            <div class="tab" data-target="tab-galeria">Galería</div>
+            <div class="tab active" data-target="tab-jugadores">Jugadores</div>
+        </div>
+
+        <div id="tab-jugadores" class="tab-content">
+            
+            <div class="roster-filters">
+                <div class="search-area">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Buscar jugador por nombre...">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="disciplina"><strong>Disciplina:</strong></label>
+                    <select id="disciplina">
+                        <option>Todas</option>
+                        <option>Fútsal</option>
+                        <option>Básquetbol</option>
+                        <option>Ajedrez</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="genero"><strong>Género:</strong></label>
+                    <select id="genero">
+                        <option>Todos</option>
+                        <option>Masculino</option>
+                        <option>Femenino</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="players-grid">
+                
+                <article class="player-card">
+                    <div class="player-top">
+                        <div class="player-photo"><i data-lucide="user"></i></div>
+                        <div class="player-header-info">
+                            <h3>Alejandro Mendoza</h3>
+                            <span class="player-sport">Fútsal Masculino</span>
+                            <span class="player-position">Pivot / Goleador</span>
+                        </div>
+                    </div>
+                    <div class="player-content">
+                        <div class="player-vitals">
+                            <div class="vital-item">
+                                <span class="vital-label">Edad</span>
+                                <span class="vital-value">22 años</span>
+                            </div>
+                            <div class="vital-item">
+                                <span class="vital-label">Altura</span>
+                                <span class="vital-value">1.82 m</span>
+                            </div>
+                            <div class="vital-item">
+                                <span class="vital-label">Peso</span>
+                                <span class="vital-value">78 kg</span>
+                            </div>
+                             <div class="vital-item">
+                                <span class="vital-label">Nac.</span>
+                                <span class="vital-value"><i data-lucide="flag"></i> BOL</span>
+                            </div>
+                        </div>
+
+                        <div class="player-stats">
+                            <div class="stats-header">Estadísticas de Temporada</div>
+                            <div class="stats-grid">
+                                <div class="stat-item" title="Partidos Jugados">
+                                    <span class="stat-label">PJ</span>
+                                    <span class="stat-value">15</span>
+                                </div>
+                                <div class="stat-item" title="Goles Anotados">
+                                    <span class="stat-label">Goles</span>
+                                    <span class="stat-value">22</span>
+                                </div>
+                                <div class="stat-item" title="Asistencias">
+                                    <span class="stat-label">Asist</span>
+                                    <span class="stat-value">6</span>
+                                </div>
+                                <div class="stat-item" title="Tarjetas Amarillas">
+                                    <span class="stat-label"><i data-lucide="square" style="fill: #fbbf24; color: #fbbf24; width: 12px;"></i></span>
+                                    <span class="stat-value">2</span>
+                                </div>
+                                <div class="stat-item" title="Tarjetas Rojas">
+                                    <span class="stat-label"><i data-lucide="square" style="fill: #ef4444; color: #ef4444; width: 12px;"></i></span>
+                                    <span class="stat-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="player-card">
+                    <div class="player-top">
+                        <div class="player-photo"><i data-lucide="user"></i></div>
+                        <div class="player-header-info">
+                            <h3>Camila Vargas</h3>
+                            <span class="player-sport">Básquetbol Femenino</span>
+                            <span class="player-position">Base / MVP</span>
+                        </div>
+                    </div>
+                    <div class="player-content">
+                        <div class="player-vitals">
+                            <div class="vital-item">
+                                <span class="vital-label">Edad</span>
+                                <span class="vital-value">20 años</span>
+                            </div>
+                            <div class="vital-item">
+                                <span class="vital-label">Altura</span>
+                                <span class="vital-value">1.75 m</span>
+                            </div>
+                            <div class="vital-item">
+                                <span class="vital-label">Peso</span>
+                                <span class="vital-value">65 kg</span>
+                            </div>
+                             <div class="vital-item">
+                                <span class="vital-label">Nac.</span>
+                                <span class="vital-value"><i data-lucide="flag"></i> BOL</span>
+                            </div>
+                        </div>
+
+                        <div class="player-stats">
+                            <div class="stats-header">Estadísticas de Temporada</div>
+                            <div class="stats-grid">
+                                <div class="stat-item" title="Partidos Jugados">
+                                    <span class="stat-label">PJ</span>
+                                    <span class="stat-value">12</span>
+                                </div>
+                                <div class="stat-item" title="Puntos por Partido">
+                                    <span class="stat-label">PPP</span>
+                                    <span class="stat-value">18.5</span>
+                                </div>
+                                <div class="stat-item" title="Rebotes por Partido">
+                                    <span class="stat-label">RPP</span>
+                                    <span class="stat-value">7.2</span>
+                                </div>
+                                <div class="stat-item" title="Asistencias por Partido">
+                                    <span class="stat-label">APP</span>
+                                    <span class="stat-value">5.1</span>
+                                </div>
+                                <div class="stat-item" title="Faltas Personales">
+                                    <span class="stat-label">FP</span>
+                                    <span class="stat-value">1.8</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="player-card">
+                    <div class="player-top">
+                        <div class="player-photo"><i data-lucide="user"></i></div>
+                        <div class="player-header-info">
+                            <h3>Diego Rojas</h3>
+                            <span class="player-sport">Ajedrez</span>
+                            <span class="player-position">Gran Maestro Nacional</span>
+                        </div>
+                    </div>
+                    <div class="player-content">
+                        <div class="player-vitals">
+                            <div class="vital-item">
+                                <span class="vital-label">Edad</span>
+                                <span class="vital-value">24 años</span>
+                            </div>
+                             <div class="vital-item">
+                                <span class="vital-label">Nac.</span>
+                                <span class="vital-value"><i data-lucide="flag"></i> BOL</span>
+                            </div>
+                            <div class="vital-item" style="flex: 2;">
+                                <span class="vital-label">Categoría</span>
+                                <span class="vital-value">Internacional</span>
+                            </div>
+                        </div>
+
+                        <div class="player-stats">
+                            <div class="stats-header">Rendimiento Histórico</div>
+                            <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                                <div class="stat-item" style="background-color: #334155;">
+                                    <span class="stat-label">Puntaje ELO</span>
+                                    <span class="stat-value">2350</span>
+                                </div>
+                                <div class="stat-item" style="background-color: #334155;">
+                                    <span class="stat-label">Ranking Nacional</span>
+                                    <span class="stat-value">#3</span>
+                                </div>
+                                <div class="stat-item" style="background-color: #334155;">
+                                    <span class="stat-label">Títulos Nac.</span>
+                                    <span class="stat-value">4</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+
+    </div>
+
+    <footer style="background-color: var(--ucb-blue); color: white; padding: 3rem 5%; margin-top: 4rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <img src="assets/UCB logo horizontal blanco.png" alt="UCB Logo" style="height: 60px;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Montserrat', sans-serif;">UCB Deportes</h3>
+                    <p style="margin: 5px 0 0 0; color: #cbd5e1; font-size: 0.9rem;">Excelencia y Valores.</p>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <p>&copy; 2026 Universidad Católica Boliviana "San Pablo"</p>
+                <p style="color: #cbd5e1; font-size: 0.9rem;">Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
