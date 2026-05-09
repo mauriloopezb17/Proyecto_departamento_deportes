@@ -7,6 +7,7 @@ import Noticias from './pages/Noticias'
 import Inscribete from './pages/Inscribete'
 import LoginPage from './LoginPage'
 import AuthCallback from './pages/AuthCallback'
+import AdminNoticias from './pages/AdminNoticias';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/club" element={<Club />} />
           <Route path="/noticias" element={<Noticias />} />
           <Route path="/inscribete" element={<Inscribete />} />
+          <Route path="/noticiasAdmin" element={<AdminNoticias />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

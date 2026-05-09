@@ -59,22 +59,7 @@ const AdminNoticias: React.FC = () => {
         </main>
       </div>
 
-      {/* ── Footer ── */}
-      <footer className="an-footer">
-        <div className="an-footer-inner">
-          <div className="an-footer-brand">
-            <span className="an-footer-sigla">UCB</span>
-            <span className="an-footer-nombre">
-              Universidad Católica Boliviana<br />
-              <em>"San Pablo"</em>
-            </span>
-          </div>
-          <p className="an-footer-copy">
-            © {new Date().getFullYear()} · Sistema de Gestión de Noticias · 
-          </p>
-          
-        </div>
-      </footer>
+      
     </div>
   );
 };
