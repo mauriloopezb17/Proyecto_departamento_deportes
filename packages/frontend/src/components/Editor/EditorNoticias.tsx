@@ -3,6 +3,16 @@ import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
 // @ts-ignore
+import ColorPlugin from 'editorjs-text-color-plugin';
+
+import {
+  Trash2, Undo2, Redo2,
+  Bold, Italic, Strikethrough, Underline as UnderlineIcon,
+  AlignLeft, AlignCenter, AlignRight, AlignJustify,
+  Minus, Plus, HelpCircle
+} from 'lucide-react';
+
+// @ts-ignore
 import ImageTool from '@editorjs/image';
 // @ts-ignore
 import Underline from '@editorjs/underline';
@@ -13,7 +23,7 @@ import Table from '@editorjs/table';
 // @ts-ignore
 import Delimiter from '@editorjs/delimiter';
 // @ts-ignore
-import ColorPlugin from 'editorjs-text-color-plugin';
+
 import '../Editor/CSS/EditorNoticias.css';
 import ModalAyuda from './ModalAyuda';
 import PreviewNoticia from './PreviewNoticia';
@@ -56,14 +66,28 @@ const EditorNoticias = ({
                     'or drag to move': 'o arrastre para mover',
                   },
                 },
+                
                 inlineToolbar: {
                   converter: { 'Convert to': 'Convertir a' },
                 },
+                
                 toolbar: {
                   toolbox: {
                     Add: 'Agregar',
                     Filter: 'Buscar herramienta...',
                   },
+                },
+              },
+              blockTunes: {
+                delete: {
+                  'Delete': 'Eliminar',
+                  'Click to delete': 'Clic para confirmar',
+                },
+                moveUp: {
+                  'Move up': 'Mover arriba',
+                },
+                moveDown: {
+                  'Move down': 'Mover abajo',
                 },
               },
               toolNames: {
@@ -84,10 +108,29 @@ const EditorNoticias = ({
             list: { class: List, inlineToolbar: true },
             underline: Underline,
             quote: { class: Quote, inlineToolbar: true },
+            color: {
+              class: ColorPlugin,
+              config: {
+                config: {  
+                  colorCollections: ['#013F62', '#FFF1B5', '#FF0000', '#000000'],
+                  defaultColor: '#013F62',
+                  type: 'text',
+                },
+              },
+            },
+             marker: {
+              class: ColorPlugin,
+              config: {
+                defaultColor: '#FFF1B5',
+                type: 'marker',
+                icon: '<svg>...</svg>',
+              },
+            },
             table: { class: Table as any, inlineToolbar: true },
             delimiter: Delimiter,
             image: {
             class: ImageTool,
+            
             config: {
               uploader: {
                 uploadByFile(file: File) {
@@ -119,13 +162,6 @@ const EditorNoticias = ({
               },
             },
           },
-            color: {
-              class: ColorPlugin,
-              config: {
-                colorCollections: ['#013F62', '#FFF1B5', '#FF0000', '#000000'],
-                type: 'text',
-              },
-            },
           },
           onChange: async () => {
             setTimeout(async () => {
@@ -259,7 +295,7 @@ const EditorNoticias = ({
           <span className="ribbon-group-label">Archivo</span>
           <div className="ribbon-buttons">
             <button className="ribbon-btn btn-delete" onClick={handleClearAll} title="Borrar todo">
-              <i className="fas fa-trash-alt" />
+              <Trash2 size={15} />
             </button>
           </div>
         </div>
@@ -269,10 +305,10 @@ const EditorNoticias = ({
           <span className="ribbon-group-label">Historial</span>
           <div className="ribbon-buttons">
             <button className="ribbon-btn" title="Deshacer" onClick={() => exec('undo')}>
-              <i className="fas fa-undo" />
+              <Undo2 size={15} />
             </button>
             <button className="ribbon-btn" title="Rehacer" onClick={() => exec('redo')}>
-              <i className="fas fa-redo" />
+              <Redo2 size={15} />
             </button>
           </div>
         </div>
@@ -282,16 +318,16 @@ const EditorNoticias = ({
           <span className="ribbon-group-label">Fuente</span>
           <div className="ribbon-buttons">
             <button className="ribbon-btn bold"      title="Negrita"    onClick={() => exec('bold')}>
-              <i className="fas fa-bold" />
+              <Bold size={15} />
             </button>
             <button className="ribbon-btn italic"    title="Cursiva"    onClick={() => exec('italic')}>
-              <i className="fas fa-italic" />
+              <Italic size={15} />
             </button>
             <button className="ribbon-btn underline" title="Subrayado"  onClick={() => exec('underline')}>
-              <i className="fas fa-underline" />
+              <UnderlineIcon size={15} />
             </button>
             <button className="ribbon-btn strike"    title="Tachado"    onClick={() => exec('strikeThrough')}>
-              <i className="fas fa-strikethrough" />
+              <Strikethrough size={15} />
             </button>
           </div>
         </div>
@@ -301,16 +337,16 @@ const EditorNoticias = ({
           <span className="ribbon-group-label">Alineación</span>
           <div className="ribbon-buttons">
             <button className="ribbon-btn" title="Izquierda" onClick={() => exec('justifyLeft')}>
-              <i className="fas fa-align-left" />
+              <AlignLeft size={15} />
             </button>
             <button className="ribbon-btn" title="Centrado"  onClick={() => exec('justifyCenter')}>
-              <i className="fas fa-align-center" />
+              <AlignCenter size={15} />
             </button>
             <button className="ribbon-btn" title="Derecha"   onClick={() => exec('justifyRight')}>
-              <i className="fas fa-align-right" />
+              <AlignRight size={15} />
             </button>
             <button className="ribbon-btn" title="Justificado" onClick={() => exec('justifyFull')}>
-              <i className="fas fa-align-justify" />
+              <AlignJustify size={15} />
             </button>
           </div>
         </div>
@@ -371,7 +407,7 @@ const EditorNoticias = ({
               title="Disminuir tamaño"
               onClick={() => handleFontSize(Math.max(8, fontSize - 2))}
             >
-              <i className="fas fa-minus" style={{ fontSize: 10 }} />
+              <Minus size={12} />
             </button>
             <input
               type="number"
@@ -387,7 +423,7 @@ const EditorNoticias = ({
               title="Aumentar tamaño"
               onClick={() => handleFontSize(Math.min(96, fontSize + 2))}
             >
-              <i className="fas fa-plus" style={{ fontSize: 10 }} />
+              <Plus size={12} />
             </button>
           </div>
         </div>
@@ -401,7 +437,7 @@ const EditorNoticias = ({
               title="¿Cómo usar el editor?"
               onClick={() => setShowHelp(true)}
             >
-              <i className="fas fa-question-circle" />
+              <HelpCircle size={15} />
             </button>
           </div>
         </div>

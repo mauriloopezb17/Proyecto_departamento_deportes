@@ -15,7 +15,7 @@ const PreviewNoticia = ({ data }: PreviewProps) => {
         switch (block.type) {
           case 'header':
             const Tag = `h${block.data.level}` as any;
-            {/* Añadimos la clase .preview-header para el azul UCB */}
+        
             return <Tag key={index} className="preview-header" dangerouslySetInnerHTML={{ __html: block.data.text }} />;
 
            case 'checklist':
@@ -42,12 +42,12 @@ const PreviewNoticia = ({ data }: PreviewProps) => {
             );
 
           case 'paragraph':
-            {/* Añadimos .preview-text para el interlineado y color */}
+        
             return <p key={index} className="preview-text" dangerouslySetInnerHTML={{ __html: block.data.text }} />;
 
           case 'list':
             const LTag = block.data.style === 'ordered' ? 'ol' : 'ul';
-            {/* Añadimos .preview-list para el padding */}
+
             return (
               <LTag key={index} className="preview-list">
                 {block.data.items.map((item: any, i: number) => {
