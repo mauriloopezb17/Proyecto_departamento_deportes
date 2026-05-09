@@ -33,6 +33,7 @@ const EditorNoticias = ({
 }: EditorProps) => {
   const ejInstance = useRef<EditorJS | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
+  const savedRange = useRef<Range | null>(null);
 
   const [previewData, setPreviewData] = useState<any>(null);
   const [showHelp, setShowHelp] = useState(false);
@@ -215,9 +216,30 @@ const EditorNoticias = ({
     return () => resizer.removeEventListener('mousedown', onMouseDown);
   }, [isShowingPreview]);
 
+  // Saves the last selection that was inside the editor so toolbar buttons
+  // can restore it before running execCommand (clicking toolbar clears selection).
+  useEffect(() => {
+    const saveEditorSelection = () => {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode)) {
+        savedRange.current = sel.getRangeAt(0).cloneRange();
+      }
+    };
+    document.addEventListener('selectionchange', saveEditorSelection);
+    return () => document.removeEventListener('selectionchange', saveEditorSelection);
+  }, []);
+
   // ==========================================
   // HELPERS DE FORMATO
   // ==========================================
+
+  const restoreSelection = () => {
+    const sel = window.getSelection();
+    if (savedRange.current && sel) {
+      sel.removeAllRanges();
+      sel.addRange(savedRange.current);
+    }
+  };
 
   const exec = (command: string, value: string | undefined = undefined) => {
     document.execCommand(command, false, value);
@@ -230,12 +252,13 @@ const EditorNoticias = ({
   };
 
   const handleFontFamily = (family: string) => {
+    restoreSelection();
     exec('fontName', family);
   };
 
   const handleFontSize = (px: number) => {
     setFontSize(px);
-
+    restoreSelection();
     exec('fontSize', '7');
     const fontElements = document.querySelectorAll('font[size="7"]');
     fontElements.forEach((el) => {
