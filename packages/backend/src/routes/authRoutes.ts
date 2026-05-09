@@ -1,12 +1,15 @@
 import { Router } from 'express';
 import passport from 'passport';
-import { googleCallback } from '../controllers/authController';
+import { googleCallback, login, register } from '../controllers/authController';
 import { authenticateJWT } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.post('/login', login);
+router.post('/register', register);
 
+// Ruta de login con Google
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get('/google/callback', 
   passport.authenticate('google', { session: false }), 
   googleCallback

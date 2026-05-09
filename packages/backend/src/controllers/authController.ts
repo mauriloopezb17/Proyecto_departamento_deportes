@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { generateToken } from '../utils/jwt';
+import pool from '../config/db';
+import bcrypt from 'bcrypt';
 
 export const googleCallback = (req: Request, res: Response) => {
   try {
@@ -20,5 +22,90 @@ export const googleCallback = (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error en callback:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+export const login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) return res.status(400).json({ error: 'Correo y contraseña son obligatorios' });
+
+  try {
+    const result = await pool.query(`
+      SELECT u.id_usuario, u.email, u.hash_password, u.id_rol, r.nombre_rol, p.nombres, p.ape_paterno
+      FROM USUARIOS u
+      JOIN PERSONAS p ON u.id_persona = p.id_persona
+      JOIN ROLES r ON u.id_rol = r.id_rol
+      WHERE u.email = $1 AND u.activo = TRUE
+    `, [email]);
+
+    if (result.rows.length === 0) return res.status(401).json({ error: 'Credenciales inválidas' });
+
+    const user = result.rows[0];
+    const isValidPassword = await bcrypt.compare(password, user.hash_password);
+
+    if (!isValidPassword) return res.status(401).json({ error: 'Credenciales inválidas' });
+
+    const token = generateToken(user);
+    const userResponse = {
+      id_usuario: user.id_usuario,
+      email: user.email,
+      id_rol: user.id_rol,
+      nombre_rol: user.nombre_rol,
+      nombres: user.nombres,
+      ape_paterno: user.ape_paterno
+    };
+
+    res.json({ message: 'Inicio de sesión exitoso', token, user: userResponse });
+  } catch (error) {
+    console.error('Error en login:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+
+export const register = async (req: Request, res: Response) => {
+  const { 
+    nombres, ape_paterno, ape_materno, fecha_nacimiento, celular,
+    email, password, id_rol
+  } = req.body;
+
+  if (!nombres || !ape_paterno || !fecha_nacimiento || !celular || !email || !password || !id_rol) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios' });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const personaResult = await client.query(`
+      INSERT INTO PERSONAS (nombres, ape_paterno, ape_materno, fecha_nacimiento, celular)
+      VALUES ($1, $2, $3, $4, $5) RETURNING id_persona
+    `, [nombres, ape_paterno, ape_materno || '', fecha_nacimiento, celular]);
+
+    const id_persona = personaResult.rows[0].id_persona;
+
+    const saltRounds = 10;
+    const hash_password = await bcrypt.hash(password, saltRounds);
+
+    await client.query(`
+      INSERT INTO USUARIOS (id_persona, id_rol, email, hash_password, activo)
+      VALUES ($1, $2, $3, $4, TRUE)
+    `, [id_persona, id_rol, email, hash_password]);
+
+    await client.query('COMMIT');
+
+    res.status(201).json({ message: 'Usuario registrado exitosamente' });
+  } catch (error: any) {
+    await client.query('ROLLBACK');
+    console.error('Error en registro:', error);
+    
+    if (error.code === '23505') {
+      return res.status(400).json({ error: 'El correo electrónico ya está registrado' });
+    }
+    res.status(500).json({ error: 'Error interno al registrar usuario' });
+  } finally {
+    client.release();
   }
 };
