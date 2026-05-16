@@ -4,6 +4,7 @@ import passport  from 'passport';
 import './config/passport';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
+import noticiasRoutes from './routes/noticiasRoutes';
 dotenv.config();
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use(passport.initialize());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/noticias', noticiasRoutes);
 
 /*app.get('/api/auth/google', passport.authenticate('google',{scope: ['profile', 'email']}));
 

@@ -165,7 +165,7 @@ function LoginPage() {
               type="button"
               className="google-btn"
               onClick={() =>
-                (window.location.href = "http://localhost:3000/api/auth/google")
+                (window.location.href = "http://localhost:3001/api/auth/google")
               }
             >
               <svg
