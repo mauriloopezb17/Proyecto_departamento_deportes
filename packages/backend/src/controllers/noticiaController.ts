@@ -1,4 +1,3 @@
-
 import { Request, Response } from "express";
 import * as noticiaService from "../services/noticiaService";
 
@@ -29,13 +28,21 @@ export const getNoticia = async (req: Request, res: Response) => {
 
 export const createNoticia = async (req: Request, res: Response) => {
   try {
-    const id_usuario_autor = 1;
-    if (!id_usuario_autor) {
+    const {
+      titulo,
+      contenido,
+      id_categoria_noticia,
+      resumen,
+      publicado,
+      imagenes,
+      id_usuario_autor,
+    } = req.body;
+
+    const autorId = id_usuario_autor || 2;
+
+    if (!autorId) {
       return res.status(401).json({ error: "No autorizado" });
     }
-
-    const { titulo, contenido, id_categoria_noticia, resumen, publicado, imagenes } =
-      req.body;
 
     if (!titulo || !contenido) {
       return res
@@ -44,7 +51,7 @@ export const createNoticia = async (req: Request, res: Response) => {
     }
 
     const id_noticia = await noticiaService.createNoticia({
-      id_usuario_autor,
+      id_usuario_autor: autorId,
       id_categoria_noticia: id_categoria_noticia ?? null,
       titulo,
       contenido,
