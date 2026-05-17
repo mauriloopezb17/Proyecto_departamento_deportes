@@ -34,3 +34,50 @@
   
 }
 
+.an-category-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 20px;
+  background: #f7f8fa;
+  border-bottom: 1px solid #e4e6ea;
+  min-height: 38px;
+}
+
+.an-category-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+}
+
+.an-category-select {
+  font-size: 0.82rem;
+  padding: 4px 10px;
+  border: 1px solid #d0d3d9;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.an-category-select:focus {
+  outline: none;
+  border-color: #002b5c;
+}
+
+.an-category-select:disabled {
+  background: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.an-published-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: #002b5c;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-left: auto;
+}
