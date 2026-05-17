@@ -38,6 +38,9 @@
   gap: 4px;
   width: 100%;
   box-sizing: border-box;
+  position: sticky;
+  top: 10px;  
+   z-index: 999;    
   box-shadow: 0 2px 8px rgba(1, 63, 98, 0.08);
 }
 
@@ -222,11 +225,11 @@
   flex: 1;
   height: calc(100vh - 120px);
   background-color: var(--workspace-bg);
-  overflow: hidden;
+  
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── Panel Editor (izquierda) ── */
+
 .editor-panel {
   flex: 1;
   display: flex;
@@ -259,14 +262,13 @@
   border-radius: 3px;
 }
 
-/* ── Contenedor hoja ── */
+
 .paper-container {
   width: 100%;
   max-width: 750px;
   margin: 0 auto;
 }
 
-/* ── Hoja de trabajo ── */
 .editor-content-area {
   background-color: var(--paper-bg);
   width: 100%;
@@ -284,7 +286,6 @@
   overflow-wrap: break-word;
 }
 
-/* Etiqueta flotante */
 .editor-content-area::before {
   content: "REDACCIÓN";
   position: absolute;
@@ -297,7 +298,6 @@
   opacity: 0.6;
 }
 
-/* ── EditorJS overrides ── */
 .ce-block__content,
 .ce-toolbar__content {
   max-width: 100% !important;
@@ -307,9 +307,7 @@
   padding-bottom: 40px !important;
 }
 
-/* ============================================================
-   RESIZER
-   ============================================================ */
+
 .resizer {
   width: 6px;
   cursor: col-resize;
@@ -328,9 +326,6 @@
   background-color: var(--butter-yellow);
 }
 
-/* ============================================================
-   PREVIEW INLINE
-   ============================================================ */
 .inline-preview {
   flex: 0 0 auto;
   width: 28%;
@@ -380,9 +375,6 @@
   border-left: 3px solid var(--butter-yellow);
 }
 
-/* ============================================================
-   PREVIEW CONTENT STYLES
-   ============================================================ */
 .preview-real-content {
   font-family: Georgia, 'Times New Roman', serif;
   color: var(--text-primary);
@@ -493,6 +485,7 @@
   font-weight: 600;
   color: var(--ocean-blue);
 }
+
 
 /* ============================================================
    RESPONSIVE

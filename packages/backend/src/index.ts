@@ -4,6 +4,7 @@ import passport  from 'passport';
 import './config/passport';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
+import noticiasRoutes from './routes/noticiasRoutes';
 dotenv.config();
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use(passport.initialize());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/noticias', noticiasRoutes);
 
 /*app.get('/api/auth/google', passport.authenticate('google',{scope: ['profile', 'email']}));
 
@@ -35,12 +37,12 @@ app.get('/api/auth/google/callback',
   }
 );*/
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`ados corriendose en http://localhost:${PORT}`);
   console.log(`OAuth2 para @ucb.edu.bo`);
 });
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send('cristo viene');
 });
 

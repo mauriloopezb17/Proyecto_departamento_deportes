@@ -103,6 +103,7 @@
 .preview-real-content h2 { font-size: 1.15rem; }
 .preview-real-content h3 { font-size: 1rem; }
 
+
 @media (max-width: 600px) {
   .editor-content-area::before {
     display: none;
