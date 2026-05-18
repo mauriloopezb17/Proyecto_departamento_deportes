@@ -44,8 +44,8 @@ const AdminNoticias: React.FC = () => {
   const [listStatus, setListStatus]   = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) { navigate('/login'); return; }
-    if (!isAdmin)         { navigate('/');      return; }
+    // if (!isAuthenticated) { navigate('/login'); return; }
+    // if (!isAdmin)         { navigate('/');      return; }
 
     noticiaApi.getCategorias()
       .then(cats => {
