@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
@@ -9,7 +10,7 @@ import {
   Trash2, Undo2, Redo2,
   Bold, Italic, Strikethrough, Underline as UnderlineIcon,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  Minus, Plus, HelpCircle
+  Minus, Plus, HelpCircle, Save, Loader2, Check,
 } from 'lucide-react';
 
 // @ts-ignore
@@ -22,229 +23,203 @@ import Quote from '@editorjs/quote';
 import Table from '@editorjs/table';
 // @ts-ignore
 import Delimiter from '@editorjs/delimiter';
-// @ts-ignore
 
 import '../Editor/CSS/EditorNoticias.css';
 import ModalAyuda from './ModalAyuda';
 import PreviewNoticia from './PreviewNoticia';
+import type { SaveStatus } from '../Layout/Navbar';
+import type { Categoria } from '../../services/noticiaApi';
+
+// ── Props ─────────────────────────────────────────────────────────────────────
 
 interface EditorProps {
-  onDataChange: (data: any) => void;
-  onPublish: () => void;
-  isShowingPreview: boolean;
-  newsData: any;
-  initialData?: any;
+  onDataChange:      (data: any) => void;
+  onPublish:         () => void;
+  onSave:            () => void;
+  isShowingPreview:  boolean;
+  newsData:          any;
+  saveStatus:        SaveStatus;
+  categorias:        Categoria[];
+  categoriaId:       number | null;
+  onCategoriaChange: (id: number) => void;
+  initialData?:      any;
 }
 
-const EditorNoticias = ({
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function SaveIcon({ status }: { status: SaveStatus }) {
+  if (status === 'guardando' || status === 'publicando')
+    return <Loader2 size={15} className="spin" />;
+  if (status === 'guardado' || status === 'publicado')
+    return <Check size={15} />;
+  return <Save size={15} />;
+}
+
+function saveLabel(status: SaveStatus): string {
+  if (status === 'guardando')  return 'Guardando…';
+  if (status === 'guardado')   return 'Guardado';
+  if (status === 'publicando') return 'Publicando…';
+  if (status === 'publicado')  return 'Guardado';
+  if (status === 'error')      return 'Error';
+  return 'Guardar';
+}
+
+// ── Componente ────────────────────────────────────────────────────────────────
+
+const EditorNoticias: React.FC<EditorProps> = ({
   onDataChange,
   isShowingPreview,
   newsData,
+  onSave,
+  saveStatus,
+  categorias,
+  categoriaId,
+  onCategoriaChange,
   initialData,
-}: EditorProps) => {
-  const ejInstance = useRef<EditorJS | null>(null);
-  const editorRef = useRef<HTMLDivElement>(null);
-  const savedRange = useRef<Range | null>(null);
+}) => {
+  const ejInstance  = useRef<EditorJS | null>(null);
+  const editorRef   = useRef<HTMLDivElement>(null);
+  const savedRange  = useRef<Range | null>(null);
 
-  const [previewData, setPreviewData] = useState<any>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [fontSize, setFontSize] = useState<number>(16);
 
-  // ==========================================
-  // EFECTO 1: INICIALIZACIÓN DE EDITORJS
-  // ==========================================
+  const isBusy = saveStatus === 'guardando' || saveStatus === 'publicando';
+
+  // ── Inicialización EditorJS ─────────────────────────────────────────────────
+
   useEffect(() => {
-    const initEditor = () => {
-      if (!ejInstance.current && editorRef.current) {
-        const editor = new EditorJS({
-          holder: editorRef.current,
-          data: initialData ?? undefined,
-          placeholder: 'Haga clic aquí para empezar a escribir su noticia...',
-          i18n: {
-            messages: {
-              ui: {
-                blockTunes: {
-                  toggler: {
-                    'Click to tune': 'Haga clic para ajustar',
-                    'or drag to move': 'o arrastre para mover',
-                  },
-                },
-                
-                inlineToolbar: {
-                  converter: { 'Convert to': 'Convertir a' },
-                },
-                
-                toolbar: {
-                  toolbox: {
-                    Add: 'Agregar',
-                    Filter: 'Buscar herramienta...',
-                  },
-                },
-              },
+    if (!ejInstance.current && editorRef.current) {
+      const editor = new EditorJS({
+        holder: editorRef.current,
+        data: initialData ?? undefined,
+        placeholder: 'Haga clic aquí para empezar a escribir su noticia...',
+        i18n: {
+          messages: {
+            ui: {
               blockTunes: {
-                delete: {
-                  'Delete': 'Eliminar',
-                  'Click to delete': 'Clic para confirmar',
-                },
-                moveUp: {
-                  'Move up': 'Mover arriba',
-                },
-                moveDown: {
-                  'Move down': 'Mover abajo',
+                toggler: {
+                  'Click to tune':   'Haga clic para ajustar',
+                  'or drag to move': 'o arrastre para mover',
                 },
               },
-              toolNames: {
-                Text: 'Texto',
-                Heading: 'Título / Encabezado',
-                'Unordered List': 'Lista de viñetas',
-                'Ordered List': 'Lista numerada',
-                Checklist: 'Lista de tareas',
-                Quote: 'Cita',
-                Table: 'Tabla',
-                Image: 'Imagen',
-                Delimiter: 'Línea divisoria',
+              inlineToolbar: { converter: { 'Convert to': 'Convertir a' } },
+              toolbar: { toolbox: { Add: 'Agregar', Filter: 'Buscar herramienta...' } },
+            },
+            blockTunes: {
+              delete:   { 'Delete': 'Eliminar', 'Click to delete': 'Clic para confirmar' },
+              moveUp:   { 'Move up': 'Mover arriba' },
+              moveDown: { 'Move down': 'Mover abajo' },
+            },
+            toolNames: {
+              Text:             'Texto',
+              Heading:          'Título / Encabezado',
+              'Unordered List': 'Lista de viñetas',
+              'Ordered List':   'Lista numerada',
+              Checklist:        'Lista de tareas',
+              Quote:            'Cita',
+              Table:            'Tabla',
+              Image:            'Imagen',
+              Delimiter:        'Línea divisoria',
+            },
+          },
+        },
+        tools: {
+          header:    { class: Header as any, inlineToolbar: true },
+          list:      { class: List, inlineToolbar: true },
+          underline: Underline,
+          quote:     { class: Quote, inlineToolbar: true },
+          color: {
+            class: ColorPlugin,
+            config: {
+              config: {
+                colorCollections: ['#013F62', '#FFF1B5', '#FF0000', '#000000'],
+                defaultColor: '#013F62',
+                type: 'text',
               },
             },
           },
-          tools: {
-            header: { class: Header as any, inlineToolbar: true },
-            list: { class: List, inlineToolbar: true },
-            underline: Underline,
-            quote: { class: Quote, inlineToolbar: true },
-            color: {
-              class: ColorPlugin,
-              config: {
-                config: {  
-                  colorCollections: ['#013F62', '#FFF1B5', '#FF0000', '#000000'],
-                  defaultColor: '#013F62',
-                  type: 'text',
-                },
-              },
-            },
-             marker: {
-              class: ColorPlugin,
-              config: {
-                defaultColor: '#FFF1B5',
-                type: 'marker',
-                icon: '<svg>...</svg>',
-              },
-            },
-            table: { class: Table as any, inlineToolbar: true },
-            delimiter: Delimiter,
-            image: {
+          marker: {
+            class: ColorPlugin,
+            config: { defaultColor: '#FFF1B5', type: 'marker', icon: '<svg>...</svg>' },
+          },
+          table:     { class: Table as any, inlineToolbar: true },
+          delimiter: Delimiter,
+          image: {
             class: ImageTool,
-            
             config: {
               uploader: {
                 uploadByFile(file: File) {
                   return new Promise((resolve, reject) => {
-                    // Validación de tipo y tamaño (max 5MB)
-                    if (!file.type.startsWith('image/')) {
-                      reject(new Error('Solo se permiten imágenes'));
-                      return;
-                    }
-                    if (file.size > 5 * 1024 * 1024) {
-                      reject(new Error('La imagen no puede superar 5MB'));
-                      return;
-                    }
-
+                    if (!file.type.startsWith('image/')) { reject(new Error('Solo se permiten imágenes')); return; }
+                    if (file.size > 5 * 1024 * 1024)    { reject(new Error('La imagen no puede superar 5MB')); return; }
                     const reader = new FileReader();
-                    reader.onload = (e) => {
-                      resolve({
-                        success: 1,
-                        file: { url: e.target?.result as string },
-                      });
-                    };
+                    reader.onload  = (e) => resolve({ success: 1, file: { url: e.target?.result as string } });
                     reader.onerror = () => reject(new Error('Error al leer el archivo'));
                     reader.readAsDataURL(file);
                   });
                 },
-                uploadByUrl(url: string) {
-                  return Promise.resolve({ success: 1, file: { url } });
-                },
+                uploadByUrl: (url: string) => Promise.resolve({ success: 1, file: { url } }),
               },
             },
           },
-          },
-          onChange: async () => {
-            setTimeout(async () => {
-              try {
-                const data = await ejInstance.current?.save();
-                if (data) {
-                  setPreviewData(data);
-                  onDataChange(data);
-                }
-              } catch (e) {
-                console.error('Error saving', e);
-              }
-            }, 150);
-          },
-        });
-
-        ejInstance.current = editor;
-      }
-    };
-
-    initEditor();
+        },
+        onChange: async () => {
+          setTimeout(async () => {
+            try {
+              const data = await ejInstance.current?.save();
+              if (data) onDataChange(data);
+            } catch (e) { console.error('Error saving', e); }
+          }, 150);
+        },
+      });
+      ejInstance.current = editor;
+    }
 
     return () => {
       if (ejInstance.current && typeof ejInstance.current.destroy === 'function') {
         ejInstance.current.isReady
-          .then(() => {
-            ejInstance.current?.destroy();
-            ejInstance.current = null;
-          })
-          .catch((e) => console.error('Error al destruir EditorJS:', e));
+          .then(() => { ejInstance.current?.destroy(); ejInstance.current = null; })
+          .catch(console.error);
       }
     };
   }, []);
 
-  // ==========================================
-  // EFECTO 2: RESIZER
-  // ==========================================
+  // ── Resizer ─────────────────────────────────────────────────────────────────
+
   useEffect(() => {
-    const leftSide = document.querySelector('.editor-panel') as HTMLElement;
+    const leftSide  = document.querySelector('.editor-panel') as HTMLElement;
     const rightSide = document.querySelector('.inline-preview') as HTMLElement;
-    const resizer = document.getElementById('dragMe');
+    const resizer   = document.getElementById('dragMe');
 
     if (!isShowingPreview) {
-      if (leftSide) {
-        leftSide.style.removeProperty('flex');
-        leftSide.style.removeProperty('width');
-      }
+      if (leftSide) { leftSide.style.removeProperty('flex'); leftSide.style.removeProperty('width'); }
       return;
     }
-
     if (!resizer || !leftSide || !rightSide) return;
 
     const onMouseDown = (e: MouseEvent) => {
       e.preventDefault();
-      const startX = e.clientX;
+      const startX          = e.clientX;
       const startWidthRight = rightSide.getBoundingClientRect().width;
-      const containerWidth = window.innerWidth;
-
-      leftSide.style.transition = 'none';
+      const containerWidth  = window.innerWidth;
+      leftSide.style.transition  = 'none';
       rightSide.style.transition = 'none';
 
-      const onMouseMove = (moveEvent: MouseEvent) => {
-        const dx = moveEvent.clientX - startX;
-        const newWidthPx = startWidthRight - dx;
-        const newWidthPercent = (newWidthPx / containerWidth) * 100;
-
-        if (newWidthPercent >= 15 && newWidthPercent <= 45) {
-          rightSide.style.width = `${newWidthPercent}%`;
-          leftSide.style.flex = `0 0 ${100 - newWidthPercent}%`;
+      const onMouseMove = (ev: MouseEvent) => {
+        const newPct = ((startWidthRight - (ev.clientX - startX)) / containerWidth) * 100;
+        if (newPct >= 15 && newPct <= 45) {
+          rightSide.style.width = `${newPct}%`;
+          leftSide.style.flex   = `0 0 ${100 - newPct}%`;
         }
       };
-
       const onMouseUp = () => {
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
         document.body.style.removeProperty('cursor');
-        leftSide.style.transition = 'flex 0.4s ease';
+        leftSide.style.transition  = 'flex 0.4s ease';
         rightSide.style.transition = 'width 0.4s ease';
       };
-
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
       document.body.style.cursor = 'col-resize';
@@ -254,74 +229,88 @@ const EditorNoticias = ({
     return () => resizer.removeEventListener('mousedown', onMouseDown);
   }, [isShowingPreview]);
 
-  // Saves the last selection that was inside the editor so toolbar buttons
-  // can restore it before running execCommand (clicking toolbar clears selection).
+  // ── Guardar selección para execCommand ──────────────────────────────────────
+
   useEffect(() => {
-    const saveEditorSelection = () => {
+    const save = () => {
       const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode)) {
+      if (sel && sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode))
         savedRange.current = sel.getRangeAt(0).cloneRange();
-      }
     };
-    document.addEventListener('selectionchange', saveEditorSelection);
-    return () => document.removeEventListener('selectionchange', saveEditorSelection);
+    document.addEventListener('selectionchange', save);
+    return () => document.removeEventListener('selectionchange', save);
   }, []);
 
-  // ==========================================
-  // HELPERS DE FORMATO
-  // ==========================================
+  // ── Helpers de formato ──────────────────────────────────────────────────────
 
   const restoreSelection = () => {
     const sel = window.getSelection();
-    if (savedRange.current && sel) {
-      sel.removeAllRanges();
-      sel.addRange(savedRange.current);
-    }
+    if (savedRange.current && sel) { sel.removeAllRanges(); sel.addRange(savedRange.current); }
   };
 
-  const exec = (command: string, value: string | undefined = undefined) => {
-    document.execCommand(command, false, value);
-  };
+  const exec = (command: string, value?: string) => document.execCommand(command, false, value);
 
   const handleClearAll = () => {
-    if (window.confirm('¿Borrar todo el contenido del editor?')) {
-      ejInstance.current?.blocks.clear();
-    }
+    if (window.confirm('¿Borrar todo el contenido del editor?')) ejInstance.current?.blocks.clear();
   };
 
-  const handleFontFamily = (family: string) => {
-    restoreSelection();
-    exec('fontName', family);
-  };
+  const handleFontFamily = (family: string) => { restoreSelection(); exec('fontName', family); };
 
   const handleFontSize = (px: number) => {
     setFontSize(px);
     restoreSelection();
     exec('fontSize', '7');
-    const fontElements = document.querySelectorAll('font[size="7"]');
-    fontElements.forEach((el) => {
+    document.querySelectorAll('font[size="7"]').forEach(el => {
       (el as HTMLElement).removeAttribute('size');
       (el as HTMLElement).style.fontSize = `${px}px`;
     });
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
 
-  // ==========================================
-  //  Estructura de la seccion
-  // ==========================================
   return (
     <div className="editor-layout">
 
-      {/* ── TOOLBAR ── */}
+      {/* ── RIBBON TOOLBAR ── */}
       <div className="ribbon-toolbar">
 
-        {/* GRUPO: Archivo */}
         <div className="ribbon-group">
           <span className="ribbon-group-label">Archivo</span>
           <div className="ribbon-buttons">
+
             <button className="ribbon-btn btn-delete" onClick={handleClearAll} title="Borrar todo">
               <Trash2 size={15} />
             </button>
+
+            <button
+              className={`ribbon-btn ribbon-btn-save ${saveStatus === 'error' ? 'btn-save-error' : saveStatus === 'guardado' || saveStatus === 'publicado' ? 'btn-save-ok' : ''}`}
+              onClick={onSave}
+              disabled={isBusy}
+              title="Guardar borrador"
+            >
+              <SaveIcon status={saveStatus} />
+              <span className="ribbon-save-label">{saveLabel(saveStatus)}</span>
+            </button>
+
+            <div className="ribbon-separator" />
+
+            <div className="ribbon-category-wrap">
+              <span className="ribbon-category-label">Categoría:</span>
+              <select
+                className="ribbon-select ribbon-select-category"
+                value={categoriaId ?? ''}
+                onChange={e => onCategoriaChange(Number(e.target.value))}
+                title="Categoría de la noticia"
+              >
+                {categorias.length === 0 && <option value="">Cargando…</option>}
+                {categorias.map(c => (
+                  <option key={c.id_categoria_noticia} value={c.id_categoria_noticia}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
           </div>
         </div>
 
@@ -329,12 +318,8 @@ const EditorNoticias = ({
         <div className="ribbon-group">
           <span className="ribbon-group-label">Historial</span>
           <div className="ribbon-buttons">
-            <button className="ribbon-btn" title="Deshacer" onClick={() => exec('undo')}>
-              <Undo2 size={15} />
-            </button>
-            <button className="ribbon-btn" title="Rehacer" onClick={() => exec('redo')}>
-              <Redo2 size={15} />
-            </button>
+            <button className="ribbon-btn" title="Deshacer" onClick={() => exec('undo')}><Undo2 size={15} /></button>
+            <button className="ribbon-btn" title="Rehacer"  onClick={() => exec('redo')}><Redo2 size={15} /></button>
           </div>
         </div>
 
@@ -342,18 +327,10 @@ const EditorNoticias = ({
         <div className="ribbon-group">
           <span className="ribbon-group-label">Fuente</span>
           <div className="ribbon-buttons">
-            <button className="ribbon-btn bold"      title="Negrita"    onClick={() => exec('bold')}>
-              <Bold size={15} />
-            </button>
-            <button className="ribbon-btn italic"    title="Cursiva"    onClick={() => exec('italic')}>
-              <Italic size={15} />
-            </button>
-            <button className="ribbon-btn underline" title="Subrayado"  onClick={() => exec('underline')}>
-              <UnderlineIcon size={15} />
-            </button>
-            <button className="ribbon-btn strike"    title="Tachado"    onClick={() => exec('strikeThrough')}>
-              <Strikethrough size={15} />
-            </button>
+            <button className="ribbon-btn bold"      title="Negrita"   onClick={() => exec('bold')}><Bold size={15} /></button>
+            <button className="ribbon-btn italic"    title="Cursiva"   onClick={() => exec('italic')}><Italic size={15} /></button>
+            <button className="ribbon-btn underline" title="Subrayado" onClick={() => exec('underline')}><UnderlineIcon size={15} /></button>
+            <button className="ribbon-btn strike"    title="Tachado"   onClick={() => exec('strikeThrough')}><Strikethrough size={15} /></button>
           </div>
         </div>
 
@@ -361,56 +338,31 @@ const EditorNoticias = ({
         <div className="ribbon-group">
           <span className="ribbon-group-label">Alineación</span>
           <div className="ribbon-buttons">
-            <button className="ribbon-btn" title="Izquierda" onClick={() => exec('justifyLeft')}>
-              <AlignLeft size={15} />
-            </button>
-            <button className="ribbon-btn" title="Centrado"  onClick={() => exec('justifyCenter')}>
-              <AlignCenter size={15} />
-            </button>
-            <button className="ribbon-btn" title="Derecha"   onClick={() => exec('justifyRight')}>
-              <AlignRight size={15} />
-            </button>
-            <button className="ribbon-btn" title="Justificado" onClick={() => exec('justifyFull')}>
-              <AlignJustify size={15} />
-            </button>
+            <button className="ribbon-btn" title="Izquierda"   onClick={() => exec('justifyLeft')}><AlignLeft size={15} /></button>
+            <button className="ribbon-btn" title="Centrado"    onClick={() => exec('justifyCenter')}><AlignCenter size={15} /></button>
+            <button className="ribbon-btn" title="Derecha"     onClick={() => exec('justifyRight')}><AlignRight size={15} /></button>
+            <button className="ribbon-btn" title="Justificado" onClick={() => exec('justifyFull')}><AlignJustify size={15} /></button>
           </div>
         </div>
 
-        {/* GRUPO: Color de texto y resaltado */}
+        {/* GRUPO: Color */}
         <div className="ribbon-group">
           <span className="ribbon-group-label">Color/Resaltado</span>
           <div className="ribbon-buttons">
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-              <input
-                type="color"
-                className="ribbon-color-input"
-                title="Color de texto"
-                onChange={(e) => exec('foreColor', e.target.value)}
-              />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-              <input
-                type="color"
-                className="ribbon-color-input"
-                defaultValue="#FFF1B5"
-                title="Color de resaltado"
-                onChange={(e) => exec('hiliteColor', e.target.value)}
-              />
-            </div>
+            <input type="color" className="ribbon-color-input" title="Color de texto"     onChange={e => exec('foreColor',   e.target.value)} />
+            <input type="color" className="ribbon-color-input" title="Color de resaltado" defaultValue="#FFF1B5" onChange={e => exec('hiliteColor', e.target.value)} />
           </div>
         </div>
 
-        {/* GRUPO: Formato y familia */}
+        {/* GRUPO: Fuente y formato */}
         <div className="ribbon-group">
           <span className="ribbon-group-label">Formato y Fuente</span>
           <div className="ribbon-buttons">
-
-            {/* Familia tipográfica */}
             <select
               className="ribbon-select"
               defaultValue="Arial"
-              onMouseDown={(e) => e.stopPropagation()}
-              onChange={(e) => handleFontFamily(e.target.value)}
+              onMouseDown={e => e.stopPropagation()}
+              onChange={e => handleFontFamily(e.target.value)}
               title="Familia tipográfica"
             >
               <option value="Arial">Arial</option>
@@ -423,33 +375,17 @@ const EditorNoticias = ({
           </div>
         </div>
 
-        {/* GRUPO: Tamaño de fuente */}
+        {/* GRUPO: Tamaño */}
         <div className="ribbon-group">
           <span className="ribbon-group-label">Tamaño</span>
           <div className="ribbon-buttons">
-            <button
-              className="ribbon-btn"
-              title="Disminuir tamaño"
-              onClick={() => handleFontSize(Math.max(8, fontSize - 2))}
-            >
-              <Minus size={12} />
-            </button>
+            <button className="ribbon-btn" title="Disminuir" onClick={() => handleFontSize(Math.max(8,  fontSize - 2))}><Minus size={12} /></button>
             <input
-              type="number"
-              className="ribbon-input-number"
-              value={fontSize}
-              min={8}
-              max={96}
-              title="Tamaño en px"
-              onChange={(e) => handleFontSize(Number(e.target.value))}
+              type="number" className="ribbon-input-number"
+              value={fontSize} min={8} max={96} title="Tamaño en px"
+              onChange={e => handleFontSize(Number(e.target.value))}
             />
-            <button
-              className="ribbon-btn"
-              title="Aumentar tamaño"
-              onClick={() => handleFontSize(Math.min(96, fontSize + 2))}
-            >
-              <Plus size={12} />
-            </button>
+            <button className="ribbon-btn" title="Aumentar"  onClick={() => handleFontSize(Math.min(96, fontSize + 2))}><Plus size={12} /></button>
           </div>
         </div>
 
@@ -457,15 +393,12 @@ const EditorNoticias = ({
         <div className="ribbon-group" style={{ borderRight: 'none' }}>
           <span className="ribbon-group-label">Ayuda</span>
           <div className="ribbon-buttons">
-            <button
-              className="ribbon-btn"
-              title="¿Cómo usar el editor?"
-              onClick={() => setShowHelp(true)}
-            >
+            <button className="ribbon-btn" title="¿Cómo usar el editor?" onClick={() => setShowHelp(true)}>
               <HelpCircle size={15} />
             </button>
           </div>
         </div>
+
       </div>
 
       {/* ── WORKSPACE ── */}
@@ -498,5 +431,3 @@ const EditorNoticias = ({
 };
 
 export default EditorNoticias;
-
-

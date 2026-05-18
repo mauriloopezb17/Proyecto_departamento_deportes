@@ -1,237 +1,210 @@
-import React, { useState, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/Layout/Navbar'
-import EditorNoticias from '../components/Editor/EditorNoticias'
-import { apiFetch } from '../utils/api'
-import { useAuth } from '../contexts/AuthContext'
-import '../pages/CSS/AdminNoticias.css'
-
-interface Categoria {
-  id_categoria_noticia: number
-  nombre: string
-}
+import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Layout/Navbar';
+import type { SaveStatus } from '../components/Layout/Navbar';
+import EditorNoticias from '../components/Editor/EditorNoticias';
+import PublishModal from '../components/Editor/PublishModal';
+import type { PublishPayload } from '../components/Editor/PublishModal';
+import * as noticiaApi from '../services/noticiaApi';
+import { apiFetch } from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
+import '../pages/CSS/AdminNoticias.css';
 
 interface NoticiaItem {
-  id_noticia: number
-  titulo: string
-  publicado: boolean
-  fecha_creacion: string
-  categoria_nombre: string
-  contenido: any
-  resumen: string | null
-  id_categoria_noticia: number
+  id_noticia: number;
+  titulo: string;
+  publicado: boolean;
+  fecha_creacion: string;
+  categoria_nombre: string;
+  contenido: any;
+  resumen: string | null;
+  id_categoria_noticia: number;
+}
+
+function extractTitle(data: any): string {
+  return data?.blocks?.find((b: any) => b.type === 'header')?.data?.text ?? 'Sin título';
 }
 
 const AdminNoticias: React.FC = () => {
-  const { user, isAdmin, isAuthenticated } = useAuth()
-  const navigate = useNavigate()
+  const { user, isAdmin, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  const [newsData, setNewsData] = useState<any>(null)
-  const [showSidebar, setShowSidebar] = useState(false)
+  const [newsData, setNewsData]       = useState<any>(null);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [showModal, setShowModal]     = useState(false);
+  const [noticiaId, setNoticiaId]     = useState<number | null>(null);
+  const [saveStatus, setSaveStatus]   = useState<SaveStatus>('nuevo');
+  const [categorias, setCategorias]   = useState<noticiaApi.Categoria[]>([]);
+  const [categoriaId, setCategoriaId] = useState<number | null>(null);
+  const [editorKey, setEditorKey]     = useState(0);
+  const [initialEditorData, setInitialEditorData] = useState<any>(undefined);
 
-  // form fields
-  const [titulo, setTitulo] = useState('')
-  const [resumen, setResumen] = useState('')
-  const [idCategoria, setIdCategoria] = useState<number | ''>('')
-  const [publicado, setPublicado] = useState(false)
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [editorKey, setEditorKey] = useState(0)
-  const [initialEditorData, setInitialEditorData] = useState<any>(undefined)
-
-  // remote data
-  const [categorias, setCategorias] = useState<Categoria[]>([])
-  const [noticias, setNoticias] = useState<NoticiaItem[]>([])
-
-  // UI state
-  const [status, setStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
-  const [saving, setSaving] = useState(false)
+  // news list state
+  const [noticias, setNoticias]       = useState<NoticiaItem[]>([]);
+  const [listStatus, setListStatus]   = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
-      return
-    }
-    if (!isAdmin) {
-      navigate('/')
-      return
-    }
-    apiFetch<Categoria[]>('/api/noticias/categorias').then(setCategorias).catch(console.error)
-    loadNoticias()
-  }, [isAuthenticated, isAdmin])
+    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isAdmin)         { navigate('/');      return; }
+
+    noticiaApi.getCategorias()
+      .then(cats => {
+        setCategorias(cats);
+        if (cats.length > 0) setCategoriaId(cats[0].id_categoria_noticia);
+      })
+      .catch(console.error);
+
+    loadNoticias();
+  }, [isAuthenticated, isAdmin]);
 
   const loadNoticias = () => {
-    apiFetch<NoticiaItem[]>('/api/noticias').then(setNoticias).catch(console.error)
-  }
+    apiFetch<NoticiaItem[]>('/api/noticias')
+      .then(setNoticias)
+      .catch(console.error);
+  };
+
+  // ── Guardar borrador ──────────────────────────────────────────────────────
 
   const handleSave = useCallback(async () => {
-    if (!titulo.trim()) {
-      setStatus({ type: 'error', msg: 'El título es obligatorio.' })
-      return
-    }
-    if (!idCategoria) {
-      setStatus({ type: 'error', msg: 'Seleccioná una categoría.' })
-      return
-    }
-    if (!newsData?.blocks?.length) {
-      setStatus({ type: 'error', msg: 'El editor está vacío. Escribí algo antes de guardar.' })
-      return
-    }
+    if (!newsData?.blocks?.length) { alert('El editor está vacío.'); return; }
+    if (!categoriaId)              { alert('Selecciona una categoría.'); return; }
 
-    setSaving(true)
-    setStatus(null)
-
-    const body = {
-      id_usuario_autor: user!.id_usuario,
-      id_categoria_noticia: idCategoria,
-      titulo,
-      resumen,
-      contenido: newsData,
-      publicado,
-      imagenes: [],
-    }
-
+    setSaveStatus('guardando');
     try {
-      if (editingId) {
-        await apiFetch(`/api/noticias/${editingId}`, {
-          method: 'PUT',
-          body: JSON.stringify(body),
-        })
-        setStatus({ type: 'success', msg: 'Noticia actualizada correctamente.' })
-      } else {
-        await apiFetch('/api/noticias', {
-          method: 'POST',
-          body: JSON.stringify(body),
-        })
-        setStatus({ type: 'success', msg: 'Noticia publicada correctamente.' })
-      }
-      resetForm()
-      loadNoticias()
-    } catch (e: any) {
-      setStatus({ type: 'error', msg: e.message ?? 'Error al guardar la noticia.' })
-    } finally {
-      setSaving(false)
+      const id = await noticiaApi.saveNoticia(
+        { titulo: extractTitle(newsData), contenido: newsData, id_categoria_noticia: categoriaId },
+        noticiaId,
+      );
+      setNoticiaId(id);
+      setSaveStatus('guardado');
+      loadNoticias();
+    } catch (err: any) {
+      setSaveStatus('error');
+      alert(`Error al guardar: ${err.message}`);
     }
-  }, [titulo, resumen, idCategoria, publicado, newsData, editingId, user])
+  }, [newsData, noticiaId, categoriaId]);
 
-  const resetForm = () => {
-    setTitulo('')
-    setResumen('')
-    setIdCategoria('')
-    setPublicado(false)
-    setEditingId(null)
-    setInitialEditorData(undefined)
-    setEditorKey((k) => k + 1)
-  }
+  // ── Publicar ──────────────────────────────────────────────────────────────
+
+  const handlePublish = useCallback(async () => {
+    if (!newsData?.blocks?.length) { alert('El editor está vacío.'); return; }
+    if (!categoriaId)              { alert('Selecciona una categoría.'); return; }
+
+    if (!noticiaId) {
+      setSaveStatus('guardando');
+      try {
+        const id = await noticiaApi.saveNoticia(
+          { titulo: extractTitle(newsData), contenido: newsData, id_categoria_noticia: categoriaId },
+          null,
+        );
+        setNoticiaId(id);
+        setSaveStatus('guardado');
+      } catch (err: any) {
+        setSaveStatus('error');
+        alert(`Error al guardar antes de publicar: ${err.message}`);
+        return;
+      }
+    }
+
+    setShowModal(true);
+  }, [newsData, noticiaId, categoriaId]);
+
+  // ── Confirmar desde el modal ──────────────────────────────────────────────
+
+  const handleModalConfirm = useCallback(async (payload: PublishPayload): Promise<void> => {
+    if (!noticiaId || !categoriaId) return;
+
+    setSaveStatus('publicando');
+    try {
+      await noticiaApi.publishNoticia(noticiaId, {
+        titulo:               payload.titulo,
+        contenido:            newsData,
+        id_categoria_noticia: categoriaId,
+        resumen:              payload.resumen,
+        imagenUrl:            payload.imagenUrl,
+      });
+      setSaveStatus('publicado');
+      loadNoticias();
+    } catch (err: any) {
+      setSaveStatus('error');
+      throw err;
+    }
+  }, [noticiaId, categoriaId, newsData]);
+
+  // ── Editar noticia existente ──────────────────────────────────────────────
 
   const handleEdit = (n: NoticiaItem) => {
-    setEditingId(n.id_noticia)
-    setTitulo(n.titulo)
-    setResumen(n.resumen ?? '')
-    setIdCategoria(n.id_categoria_noticia)
-    setPublicado(n.publicado)
-    setInitialEditorData(n.contenido ?? undefined)
-    setEditorKey((k) => k + 1)
-    setStatus(null)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+    setNoticiaId(n.id_noticia);
+    setCategoriaId(n.id_categoria_noticia);
+    setInitialEditorData(n.contenido ?? undefined);
+    setEditorKey(k => k + 1);
+    setSaveStatus('guardado');
+    setListStatus(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('¿Eliminar esta noticia permanentemente?')) return
+    if (!window.confirm('¿Eliminar esta noticia permanentemente?')) return;
     try {
-      await apiFetch(`/api/noticias/${id}`, { method: 'DELETE' })
-      loadNoticias()
-      if (editingId === id) resetForm()
+      await apiFetch(`/api/noticias/${id}`, { method: 'DELETE' });
+      if (noticiaId === id) resetEditor();
+      loadNoticias();
     } catch (e: any) {
-      setStatus({ type: 'error', msg: e.message ?? 'Error al eliminar.' })
+      setListStatus({ type: 'error', msg: e.message ?? 'Error al eliminar.' });
     }
-  }
+  };
 
-  const togglePreview = useCallback(() => setShowSidebar((prev) => !prev), [])
+  const resetEditor = () => {
+    setNoticiaId(null);
+    setInitialEditorData(undefined);
+    setEditorKey(k => k + 1);
+    setSaveStatus('nuevo');
+  };
+
+  // ── Misc ──────────────────────────────────────────────────────────────────
+
+  const handleDataChange = useCallback((data: any) => {
+    setNewsData(data);
+    if (saveStatus === 'guardado' || saveStatus === 'publicado') setSaveStatus('nuevo');
+  }, [saveStatus]);
+
+  const togglePreview = useCallback(() => setShowSidebar(p => !p), []);
 
   const displayName = user
     ? `${user.nombres ?? ''} ${user.ape_paterno ?? ''}`.trim() || user.email
-    : 'Admin'
+    : 'Admin';
 
   return (
     <div className="an-root">
       <Navbar
         onTogglePreview={togglePreview}
         isShowingPreview={showSidebar}
-        onPublish={handleSave}
+        onPublish={handlePublish}
+        saveStatus={saveStatus}
         userName={displayName}
       />
 
       <div className="an-body">
-        {/* ── FORM SIDEBAR ── */}
+        {/* ── NEWS LIST SIDEBAR ── */}
         <aside className="an-sidebar an-sidebar-form">
-          <div className="an-form">
-            <h3 className="an-form-title">
-              {editingId ? 'Editando noticia' : 'Nueva noticia'}
-            </h3>
-
-            {status && (
-              <div className={`an-status an-status-${status.type}`}>{status.msg}</div>
-            )}
-
-            <label className="an-label">Título *</label>
-            <input
-              className="an-input"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              placeholder="Título de la noticia"
-            />
-
-            <label className="an-label">Resumen</label>
-            <textarea
-              className="an-input an-textarea"
-              value={resumen}
-              onChange={(e) => setResumen(e.target.value)}
-              placeholder="Breve descripción visible en listados"
-              rows={3}
-            />
-
-            <label className="an-label">Categoría *</label>
-            <select
-              className="an-input"
-              value={idCategoria}
-              onChange={(e) => setIdCategoria(Number(e.target.value))}
-            >
-              <option value="">Seleccionar categoría...</option>
-              {categorias.map((c) => (
-                <option key={c.id_categoria_noticia} value={c.id_categoria_noticia}>
-                  {c.nombre}
-                </option>
-              ))}
-            </select>
-
-            <label className="an-check-label">
-              <input
-                type="checkbox"
-                checked={publicado}
-                onChange={(e) => setPublicado(e.target.checked)}
-              />
-              Publicar inmediatamente
-            </label>
-
-            <button className="an-save-btn" onClick={handleSave} disabled={saving}>
-              {saving ? 'Guardando...' : editingId ? 'Actualizar noticia' : 'Publicar noticia'}
-            </button>
-
-            {editingId && (
-              <button className="an-cancel-btn" onClick={resetForm}>
-                Cancelar edición
-              </button>
-            )}
-          </div>
-
-          {/* ── NEWS LIST ── */}
           <div className="an-news-list">
-            <h4 className="an-list-title">Noticias existentes ({noticias.length})</h4>
+            <div className="an-list-header">
+              <h4 className="an-list-title">Noticias ({noticias.length})</h4>
+              {noticiaId && (
+                <button className="an-new-btn" onClick={resetEditor}>+ Nueva</button>
+              )}
+            </div>
+
+            {listStatus && (
+              <div className={`an-status an-status-${listStatus.type}`}>{listStatus.msg}</div>
+            )}
+
             {noticias.length === 0 && (
               <p className="an-list-empty">No hay noticias aún.</p>
             )}
+
             {noticias.map((n) => (
-              <div key={n.id_noticia} className="an-news-item">
+              <div key={n.id_noticia} className={`an-news-item ${noticiaId === n.id_noticia ? 'active' : ''}`}>
                 <div className="an-news-item-info">
                   <span className={`an-pub-badge ${n.publicado ? 'published' : 'draft'}`}>
                     {n.publicado ? 'Publicado' : 'Borrador'}
@@ -240,12 +213,8 @@ const AdminNoticias: React.FC = () => {
                   <span className="an-news-item-cat">{n.categoria_nombre}</span>
                 </div>
                 <div className="an-news-item-actions">
-                  <button className="an-item-btn edit" onClick={() => handleEdit(n)}>
-                    Editar
-                  </button>
-                  <button className="an-item-btn delete" onClick={() => handleDelete(n.id_noticia)}>
-                    Eliminar
-                  </button>
+                  <button className="an-item-btn edit"   onClick={() => handleEdit(n)}>Editar</button>
+                  <button className="an-item-btn delete" onClick={() => handleDelete(n.id_noticia)}>Eliminar</button>
                 </div>
               </div>
             ))}
@@ -256,16 +225,28 @@ const AdminNoticias: React.FC = () => {
         <main className="an-main">
           <EditorNoticias
             key={editorKey}
-            onDataChange={setNewsData}
-            onPublish={handleSave}
+            onDataChange={handleDataChange}
+            onPublish={handlePublish}
+            onSave={handleSave}
             isShowingPreview={showSidebar}
             newsData={newsData}
+            saveStatus={saveStatus}
+            categorias={categorias}
+            categoriaId={categoriaId}
+            onCategoriaChange={setCategoriaId}
             initialData={initialEditorData}
           />
         </main>
       </div>
-    </div>
-  )
-}
 
-export default AdminNoticias
+      <PublishModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onConfirm={handleModalConfirm}
+        newsData={newsData}
+      />
+    </div>
+  );
+};
+
+export default AdminNoticias;

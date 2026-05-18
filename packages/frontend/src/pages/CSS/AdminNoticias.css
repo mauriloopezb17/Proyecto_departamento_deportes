@@ -267,3 +267,30 @@
   flex-direction: column;
   min-width: 0;
 }
+
+/* ── LIST HEADER ── */
+.an-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.an-new-btn {
+  padding: 4px 10px;
+  background: var(--ucb-blue);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.an-new-btn:hover { opacity: 0.85; }
+
+.an-news-item.active {
+  border-color: var(--ucb-blue);
+  background: var(--ucb-blue-light);
+}
