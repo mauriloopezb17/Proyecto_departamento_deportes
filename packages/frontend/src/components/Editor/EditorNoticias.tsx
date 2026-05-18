@@ -30,16 +30,17 @@ import PreviewNoticia from './PreviewNoticia';
 
 interface EditorProps {
   onDataChange: (data: any) => void;
-  
   onPublish: () => void;
   isShowingPreview: boolean;
   newsData: any;
+  initialData?: any;
 }
 
 const EditorNoticias = ({
   onDataChange,
   isShowingPreview,
   newsData,
+  initialData,
 }: EditorProps) => {
   const ejInstance = useRef<EditorJS | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -57,6 +58,7 @@ const EditorNoticias = ({
       if (!ejInstance.current && editorRef.current) {
         const editor = new EditorJS({
           holder: editorRef.current,
+          data: initialData ?? undefined,
           placeholder: 'Haga clic aquí para empezar a escribir su noticia...',
           i18n: {
             messages: {

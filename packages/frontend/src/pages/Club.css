@@ -238,3 +238,527 @@
   font-weight: bold;
   color: var(--ucb-yellow);
 }
+
+/* ══════════════════════════════════════════
+   GALERÍA (HU-WEB-08)
+══════════════════════════════════════════ */
+
+.galeria-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.galeria-type-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.galeria-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  background: white;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.galeria-toggle-btn.active {
+  background: var(--ucb-blue);
+  border-color: var(--ucb-blue);
+  color: white;
+}
+
+.galeria-toggle-btn:not(.active):hover {
+  border-color: var(--ucb-blue);
+  color: var(--ucb-blue);
+}
+
+.galeria-discipline-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.galeria-disc-btn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: white;
+  color: var(--text-light);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.galeria-disc-btn.active {
+  background: var(--ucb-yellow);
+  border-color: var(--ucb-yellow-dark);
+  color: var(--ucb-blue);
+}
+
+.galeria-disc-btn:not(.active):hover {
+  border-color: var(--ucb-blue);
+  color: var(--ucb-blue);
+}
+
+.galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  margin-bottom: 3rem;
+}
+
+.galeria-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.25s, box-shadow 0.25s;
+  text-decoration: none;
+  display: block;
+}
+
+.galeria-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--hover-shadow);
+}
+
+.galeria-thumb {
+  position: relative;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.galeria-thumb-icon {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.galeria-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.galeria-card:hover .galeria-thumb-overlay {
+  opacity: 1;
+}
+
+.galeria-play-btn {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  transition: background 0.2s;
+}
+
+.galeria-card:hover .galeria-play-btn {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.galeria-duration {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.65);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.galeria-card-info {
+  padding: 14px 16px;
+}
+
+.galeria-disc-tag {
+  display: inline-block;
+  background: var(--ucb-yellow);
+  color: var(--ucb-blue);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+}
+
+.galeria-card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.galeria-card-date {
+  font-size: 0.78rem;
+  color: var(--text-light);
+}
+
+/* Lightbox */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.lightbox-box {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 640px;
+  width: 100%;
+  position: relative;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.lightbox-close:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.lightbox-img {
+  height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-icon {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-info {
+  padding: 20px 24px 24px;
+}
+
+.lightbox-info h3 {
+  color: var(--ucb-blue);
+  margin: 8px 0 6px;
+  font-size: 1.2rem;
+}
+
+.lightbox-info p {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+/* ══════════════════════════════════════════
+   HORARIOS (HU-WEB-09)
+══════════════════════════════════════════ */
+
+.horarios-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.hor-filter-btn {
+  padding: 7px 18px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border-color);
+  background: white;
+  color: var(--text-light);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hor-filter-btn.active {
+  background: var(--ucb-blue);
+  border-color: var(--ucb-blue);
+  color: white;
+}
+
+.hor-filter-btn:not(.active):hover {
+  border-color: var(--ucb-blue);
+  color: var(--ucb-blue);
+}
+
+.horarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 1.5rem;
+}
+
+.horario-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.horario-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--hover-shadow);
+}
+
+.horario-card-header {
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.horario-discipline {
+  color: white;
+  font-size: 1.25rem;
+  margin-bottom: 4px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.horario-category {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+}
+
+.horario-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.horario-day-chip {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.horario-card-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.horario-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.horario-detail svg {
+  color: var(--ucb-blue);
+  flex-shrink: 0;
+}
+
+.horarios-note {
+  color: var(--text-light);
+  font-size: 0.82rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  font-style: italic;
+}
+
+/* ══════════════════════════════════════════
+   ENTRENADORES (HU-WEB-10)
+══════════════════════════════════════════ */
+
+.coaches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 28px;
+  margin-bottom: 4rem;
+}
+
+.coach-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.coach-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--hover-shadow);
+}
+
+.coach-top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 22px 18px;
+  border-bottom: 4px solid rgba(255, 241, 181, 0.7);
+}
+
+.coach-photo {
+  width: 88px;
+  height: 88px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.85);
+  flex-shrink: 0;
+}
+
+.coach-header-info h3 {
+  color: white;
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+
+.coach-role {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.coach-disciplines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.coach-disc-tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.coach-body {
+  padding: 18px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.coach-exp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ucb-blue-light);
+  color: var(--ucb-blue);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.coach-bio {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.coach-certs-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1.5px solid var(--border-color);
+  color: var(--ucb-blue);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  width: fit-content;
+}
+
+.coach-certs-toggle:hover {
+  border-color: var(--ucb-blue);
+  background: var(--ucb-blue-light);
+}
+
+.coach-certs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.coach-certs-list li {
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  padding: 5px 10px 5px 14px;
+  background: var(--bg-light);
+  border-radius: 6px;
+  border-left: 3px solid var(--ucb-yellow);
+}

@@ -130,6 +130,13 @@
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.home-news-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .home-news-content {

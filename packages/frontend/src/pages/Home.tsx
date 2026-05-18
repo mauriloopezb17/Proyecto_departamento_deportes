@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   UserPlus,
@@ -6,7 +7,9 @@ import {
   Calendar,
   Medal,
   User,
+  Newspaper,
 } from 'lucide-react'
+import { apiFetch } from '../utils/api'
 import './Home.css'
 
 const lastResults = [
@@ -30,7 +33,7 @@ const upcomingMatches = [
   },
 ]
 
-const news = [
+const staticNews = [
   {
     Icon: Trophy,
     tag: 'Intercarreras',
@@ -57,7 +60,25 @@ const players = [
   { name: 'Diego Rojas', sport: 'Ajedrez - Civil', stat: 'Campeón Nacional' },
 ]
 
+interface Noticia {
+  id_noticia: number
+  titulo: string
+  resumen: string | null
+  categoria_nombre: string
+  imagen_portada: string | null
+}
+
 function Home() {
+  const [noticias, setNoticias] = useState<Noticia[]>([])
+
+  useEffect(() => {
+    apiFetch<Noticia[]>('/api/noticias?publicado=true')
+      .then((data) => setNoticias(data.slice(0, 3)))
+      .catch(() => {})
+  }, [])
+
+  const newsItems = noticias.length > 0 ? noticias : null
+
   return (
     <>
       <header className="hero">
@@ -105,18 +126,35 @@ function Home() {
 
         <h2 className="section-title">Noticias del Club</h2>
         <section className="home-news-grid">
-          {news.map(({ Icon, tag, title, body }, i) => (
-            <article key={i} className="home-news-card">
-              <div className="home-news-img">
-                <Icon size={64} />
-              </div>
-              <div className="home-news-content">
-                <span className="home-news-tag">{tag}</span>
-                <h3>{title}</h3>
-                <p>{body}</p>
-              </div>
-            </article>
-          ))}
+          {newsItems
+            ? newsItems.map((n) => (
+                <article key={n.id_noticia} className="home-news-card">
+                  <div className="home-news-img">
+                    {n.imagen_portada ? (
+                      <img src={n.imagen_portada} alt={n.titulo} className="home-news-cover" />
+                    ) : (
+                      <Newspaper size={64} />
+                    )}
+                  </div>
+                  <div className="home-news-content">
+                    <span className="home-news-tag">{n.categoria_nombre}</span>
+                    <h3>{n.titulo}</h3>
+                    <p>{n.resumen ?? ''}</p>
+                  </div>
+                </article>
+              ))
+            : staticNews.map(({ Icon, tag, title, body }, i) => (
+                <article key={i} className="home-news-card">
+                  <div className="home-news-img">
+                    <Icon size={64} />
+                  </div>
+                  <div className="home-news-content">
+                    <span className="home-news-tag">{tag}</span>
+                    <h3>{title}</h3>
+                    <p>{body}</p>
+                  </div>
+                </article>
+              ))}
         </section>
         <div className="section-footer">
           <Link to="/noticias" className="btn-more">
