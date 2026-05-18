@@ -7,6 +7,7 @@ import passport  from 'passport';
 import './config/passport';
 import authRoutes from './routes/authRoutes';
 import noticiasRoutes from './routes/noticiasRoutes';
+import uploadRoutes from './routes/uploadRoutes';
 
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(passport.initialize());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/noticias', noticiasRoutes);
+app.use('/api/upload', uploadRoutes);
 
 /*app.get('/api/auth/google', passport.authenticate('google',{scope: ['profile', 'email']}));
 
