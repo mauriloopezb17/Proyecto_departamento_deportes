@@ -29,6 +29,7 @@ import ModalAyuda from './ModalAyuda';
 import PreviewNoticia from './PreviewNoticia';
 import type { SaveStatus } from '../Layout/Navbar';
 import type { Categoria } from '../../services/noticiaApi';
+import { uploadImagen } from '../../services/noticiaApi';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -149,15 +150,10 @@ const EditorNoticias: React.FC<EditorProps> = ({
             class: ImageTool,
             config: {
               uploader: {
-                uploadByFile(file: File) {
-                  return new Promise((resolve, reject) => {
-                    if (!file.type.startsWith('image/')) { reject(new Error('Solo se permiten imágenes')); return; }
-                    if (file.size > 5 * 1024 * 1024)    { reject(new Error('La imagen no puede superar 5MB')); return; }
-                    const reader = new FileReader();
-                    reader.onload  = (e) => resolve({ success: 1, file: { url: e.target?.result as string } });
-                    reader.onerror = () => reject(new Error('Error al leer el archivo'));
-                    reader.readAsDataURL(file);
-                  });
+                uploadByFile(file: File): Promise<{ success: number; file: { url: string } }> {
+                  return uploadImagen(file)
+                    .then(url => ({ success: 1, file: { url } }))
+                    .catch(() => ({ success: 0, file: { url: '' } }));
                 },
                 uploadByUrl: (url: string) => Promise.resolve({ success: 1, file: { url } }),
               },

@@ -3,6 +3,8 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
 import passport  from 'passport';
 import './config/passport';
 import authRoutes from './routes/authRoutes';
@@ -15,6 +17,9 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(passport.initialize());
+
+
+app.use('/temp', express.static(path.join(__dirname, '../uploads/temp')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/noticias', noticiasRoutes);
@@ -50,4 +55,5 @@ app.listen(PORT, () => {
 app.get('/api', (req, res) => {
   res.send('cristo viene');
 });
+
 

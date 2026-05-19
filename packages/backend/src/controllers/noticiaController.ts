@@ -29,38 +29,31 @@ export const getNoticia = async (req: Request, res: Response) => {
 export const createNoticia = async (req: Request, res: Response) => {
   try {
     const {
-      titulo,
-      contenido,
-      id_categoria_noticia,
-      resumen,
-      publicado,
-      imagenes,
-      id_usuario_autor,
+      titulo, contenido, id_categoria_noticia,
+      resumen, publicado, imagenes, id_usuario_autor,
     } = req.body;
 
-    const autorId = id_usuario_autor || 2;
-
-    if (!autorId) {
-      return res.status(401).json({ error: "No autorizado" });
-    }
+    const autorId = id_usuario_autor || 1;
 
     if (!titulo || !contenido) {
-      return res
-        .status(400)
-        .json({ error: "titulo y contenido son requeridos" });
+      return res.status(400).json({ error: "titulo y contenido son requeridos" });
     }
 
-    const id_noticia = await noticiaService.createNoticia({
-      id_usuario_autor: autorId,
+    const result = await noticiaService.createNoticia({
+      id_usuario_autor:    autorId,
       id_categoria_noticia: id_categoria_noticia ?? null,
       titulo,
       contenido,
-      resumen: resumen || null,
+      resumen:  resumen || null,
       publicado: publicado ?? false,
       imagenes: imagenes ?? [],
     });
 
-    res.status(201).json({ message: "Noticia creada con éxito", id_noticia });
+    res.status(201).json({
+      message:    "Noticia creada con éxito",
+      id_noticia: result.id_noticia,
+      contenido:  result.contenido,   
+    });
   } catch (error) {
     console.error("Error al crear noticia:", error);
     res.status(500).json({ error: "Error interno del servidor" });
@@ -70,8 +63,12 @@ export const createNoticia = async (req: Request, res: Response) => {
 export const updateNoticia = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    await noticiaService.updateNoticia(parseInt(id, 10), req.body);
-    res.json({ message: "Noticia actualizada con éxito" });
+   
+    const contenidoFinal = await noticiaService.updateNoticia(parseInt(id, 10), req.body);
+    res.json({
+      message:   "Noticia actualizada con éxito",
+      contenido: contenidoFinal,   
+    });
   } catch (error) {
     console.error("Error al actualizar noticia:", error);
     res.status(500).json({ error: "Error interno del servidor" });

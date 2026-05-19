@@ -1,4 +1,3 @@
-
 const BASE = "/api/noticias";
 
 export interface Categoria {
@@ -8,7 +7,7 @@ export interface Categoria {
 
 export interface SaveDraftDTO {
   titulo: string;
-  contenido: object; 
+  contenido: object;
   id_categoria_noticia: number;
 }
 
@@ -17,12 +16,13 @@ export interface PublishDTO {
   contenido: object;
   id_categoria_noticia: number;
   resumen: string;
-  imagenUrl: string | null; 
+  imagenUrl: string | null;
 }
 
 export interface CreateNoticiaResponse {
-  message: string;
+  message:    string;
   id_noticia: number;
+  contenido?: any; // JSON de EditorJS con URLs de OCI
 }
 
 function authHeaders(): Record<string, string> {
@@ -45,50 +45,97 @@ export async function getCategorias(): Promise<Categoria[]> {
   return handleRes<Categoria[]>(res);
 }
 
+/**
+ * Sube imagen del EDITOR a carpeta temp del servidor.
+ * No va a OCI todavía — se sube al guardar o publicar.
+ */
+export async function uploadImagen(file: File): Promise<string> {
+  const token = localStorage.getItem("ucb_token");
+  const formData = new FormData();
+  formData.append("imagen", file);
 
+  const res = await fetch(`/api/upload/temp`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  const data = await handleRes<{ url: string }>(res);
+  return data.url;
+}
+
+/**
+ * Sube imagen de PORTADA directamente a OCI.
+ * Se llama desde el PublishModal.
+ */
+export async function uploadImagenPortada(file: File): Promise<string> {
+  const token = localStorage.getItem("ucb_token");
+  const formData = new FormData();
+  formData.append("imagen", file);
+
+  const res = await fetch(`/api/upload`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  const data = await handleRes<{ url: string }>(res);
+  return data.url;
+}
+
+/** POST /api/noticias — crea borrador */
 export async function createDraft(dto: SaveDraftDTO): Promise<CreateNoticiaResponse> {
   const res = await fetch(BASE, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({
-      titulo: dto.titulo,
-      contenido: dto.contenido,
+      titulo:               dto.titulo,
+      contenido:            dto.contenido,
       id_categoria_noticia: dto.id_categoria_noticia,
-      publicado: false,
+      publicado:            false,
     }),
   });
   return handleRes<CreateNoticiaResponse>(res);
 }
 
-
-export async function updateDraft(id: number, dto: SaveDraftDTO): Promise<void> {
+/** PUT /api/noticias/:id — actualiza borrador */
+export async function updateDraft(
+  id: number,
+  dto: SaveDraftDTO,
+): Promise<{ message: string; contenido: any }> {
   const res = await fetch(`${BASE}/${id}`, {
     method: "PUT",
     headers: authHeaders(),
     body: JSON.stringify({
-      titulo: dto.titulo,
-      contenido: dto.contenido,
+      titulo:               dto.titulo,
+      contenido:            dto.contenido,
       id_categoria_noticia: dto.id_categoria_noticia,
     }),
   });
-  await handleRes<unknown>(res);
+  return handleRes<{ message: string; contenido: any }>(res);
 }
 
+/**
+ * Guarda el borrador. Devuelve { id, contenido } donde:
+ * - id       = id_noticia en la BD
+ * - contenido = JSON de EditorJS con URLs de OCI (temps ya subidos)
+ */
 export async function saveNoticia(
   dto: SaveDraftDTO,
   id?: number | null,
-): Promise<number> {
+): Promise<{ id: number; contenido: any }> {
   if (id) {
-    await updateDraft(id, dto);
-    return id;
+    // response.contenido = JSON EditorJS con URLs OCI (viene directo del service)
+    const response = await updateDraft(id, dto);
+    return { id, contenido: response.contenido };
   }
   const response = await createDraft(dto);
-  return response.id_noticia;
+  // response.contenido = JSON EditorJS con URLs OCI
+  return { id: response.id_noticia, contenido: response.contenido };
 }
 
-
+/** PUT /api/noticias/:id — publica la noticia */
 export async function publishNoticia(id: number, dto: PublishDTO): Promise<void> {
-
   const imagenes = dto.imagenUrl
     ? [{ url_storage: dto.imagenUrl, es_portada: true }]
     : [];
@@ -97,11 +144,11 @@ export async function publishNoticia(id: number, dto: PublishDTO): Promise<void>
     method: "PUT",
     headers: authHeaders(),
     body: JSON.stringify({
-      titulo: dto.titulo,
-      contenido: dto.contenido,
+      titulo:               dto.titulo,
+      contenido:            dto.contenido,
       id_categoria_noticia: dto.id_categoria_noticia,
-      resumen: dto.resumen,
-      publicado: true,
+      resumen:              dto.resumen,
+      publicado:            true,
       imagenes,
     }),
   });

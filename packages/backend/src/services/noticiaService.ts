@@ -1,5 +1,81 @@
 import pool from "../config/db";
 import { NoticiaData, NoticiaResponse } from "../types/noticia";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { s3Client, BUCKET_NAME, CDN_PUBLIC_URL, OCI_NAMESPACE } from "../config/oracleStorage";
+import fs from "fs";
+import path from "path";
+
+// ── Helper: sube archivo temp a OCI y lo borra del disco ─────────────────────
+
+async function subirTempAOCI(urlTemp: string): Promise<string> {
+  const filename = urlTemp.replace('/temp/', '');
+  const filepath = path.join(__dirname, '../../uploads/temp', filename);
+
+  if (!fs.existsSync(filepath)) {
+    throw new Error(`Archivo temporal no encontrado: ${filepath}`);
+  }
+
+  const buffer = fs.readFileSync(filepath);
+  const ociFilename = `cms-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.webp`;
+
+  await s3Client.send(new PutObjectCommand({
+    Bucket:      BUCKET_NAME,
+    Key:         ociFilename,
+    Body:        buffer,
+    ContentType: "image/webp",
+  }));
+
+  fs.unlinkSync(filepath);
+
+  return `${CDN_PUBLIC_URL}/n/${OCI_NAMESPACE}/b/${BUCKET_NAME}/o/${ociFilename}`;
+}
+
+// ── Helper: recorre bloques, sube temps a OCI, actualiza URLs ─────────────────
+
+async function procesarImagenesContenido(
+  contenido: any,
+  id_noticia: number,
+  client: any,
+): Promise<any> {
+  if (!contenido?.blocks) return contenido;
+
+  const blocks = await Promise.all(
+    contenido.blocks.map(async (block: any) => {
+      if (block.type === 'image' && block.data?.file?.url) {
+        const url = block.data.file.url;
+
+        if (url.startsWith('/temp/')) {
+          // Imagen nueva → subir a OCI
+          console.log(`[TEMP] Procesando: ${url}`);
+          const urlOCI = await subirTempAOCI(url);
+          console.log(`[TEMP] Subido a OCI: ${urlOCI}`);
+
+          await client.query(
+            'INSERT INTO NOTICIAS_IMAGENES (id_noticia, url_storage, es_portada) VALUES ($1, $2, false)',
+            [id_noticia, urlOCI],
+          );
+
+          return {
+            ...block,
+            data: { ...block.data, file: { ...block.data.file, url: urlOCI } },
+          };
+        } else {
+          // Imagen ya en OCI → solo registrar en la tabla
+          await client.query(
+            'INSERT INTO NOTICIAS_IMAGENES (id_noticia, url_storage, es_portada) VALUES ($1, $2, false)',
+            [id_noticia, url],
+          );
+          return block;
+        }
+      }
+      return block;
+    }),
+  );
+
+  return { ...contenido, blocks };
+}
+
+// ── Queries ───────────────────────────────────────────────────────────────────
 
 export const getAllNoticias = async (
   soloPublicados = false,
@@ -12,10 +88,7 @@ export const getAllNoticias = async (
     JOIN PERSONAS p ON u.id_persona = p.id_persona
   `;
 
-  if (soloPublicados) {
-    query += " WHERE n.publicado = TRUE";
-  }
-
+  if (soloPublicados) query += " WHERE n.publicado = TRUE";
   query += " ORDER BY n.fecha_creacion DESC";
 
   const result = await pool.query(query);
@@ -48,49 +121,53 @@ export const getNoticiaById = async (
     WHERE n.id_noticia = $1
   `;
   const result = await pool.query(query, [id]);
-
   if (result.rows.length === 0) return null;
 
   const noticia = result.rows[0];
-
   const imagenesResult = await pool.query(
     "SELECT url_storage, es_portada FROM NOTICIAS_IMAGENES WHERE id_noticia = $1",
     [id],
   );
 
-  return {
-    ...noticia,
-    imagenes: imagenesResult.rows,
-  };
+  return { ...noticia, imagenes: imagenesResult.rows };
 };
 
-export const createNoticia = async (data: NoticiaData): Promise<number> => {
+// Devuelve { id_noticia, contenido } donde contenido es el JSON de EditorJS con URLs de OCI
+export const createNoticia = async (
+  data: NoticiaData,
+): Promise<{ id_noticia: number; contenido: any }> => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    const noticiaQuery = `
-      INSERT INTO NOTICIAS (
-        id_usuario_autor, id_categoria_noticia, titulo, contenido, 
-        resumen, publicado, fecha_creacion, fecha_publicacion
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)
-      RETURNING id_noticia
-    `;
-
     const fechaPublicacion = data.publicado ? new Date() : null;
 
-    const noticiaResult = await client.query(noticiaQuery, [
-      data.id_usuario_autor,
-      data.id_categoria_noticia,
-      data.titulo,
-      JSON.stringify(data.contenido),
-      data.resumen || null,
-      data.publicado,
-      fechaPublicacion,
-    ]);
+    const noticiaResult = await client.query(
+      `INSERT INTO NOTICIAS (
+        id_usuario_autor, id_categoria_noticia, titulo, contenido,
+        resumen, publicado, fecha_creacion, fecha_publicacion
+      ) VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)
+      RETURNING id_noticia`,
+      [
+        data.id_usuario_autor,
+        data.id_categoria_noticia,
+        data.titulo,
+        JSON.stringify(data.contenido),
+        data.resumen || null,
+        data.publicado,
+        fechaPublicacion,
+      ],
+    );
 
     const id_noticia = noticiaResult.rows[0].id_noticia;
+
+    // Subir temps a OCI y actualizar URLs en el JSON
+    const contenidoFinal = await procesarImagenesContenido(data.contenido, id_noticia, client);
+
+    await client.query(
+      'UPDATE NOTICIAS SET contenido = $1 WHERE id_noticia = $2',
+      [JSON.stringify(contenidoFinal), id_noticia],
+    );
 
     if (data.imagenes && data.imagenes.length > 0) {
       for (const img of data.imagenes) {
@@ -102,7 +179,8 @@ export const createNoticia = async (data: NoticiaData): Promise<number> => {
     }
 
     await client.query("COMMIT");
-    return id_noticia;
+    // ✅ Devuelve id_noticia y el JSON de EditorJS con URLs de OCI
+    return { id_noticia, contenido: contenidoFinal };
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -111,13 +189,14 @@ export const createNoticia = async (data: NoticiaData): Promise<number> => {
   }
 };
 
-export const updateNoticia = async (id: number, data: Partial<NoticiaData>) => {
+// Devuelve el JSON de EditorJS actualizado con URLs de OCI (no un objeto anidado)
+export const updateNoticia = async (id: number, data: Partial<NoticiaData>): Promise<any> => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    const fields = [];
-    const values = [];
+    const fields: string[] = [];
+    const values: any[]    = [];
     let i = 1;
 
     if (data.id_categoria_noticia) {
@@ -128,10 +207,6 @@ export const updateNoticia = async (id: number, data: Partial<NoticiaData>) => {
       fields.push(`titulo = $${i++}`);
       values.push(data.titulo);
     }
-    if (data.contenido) {
-      fields.push(`contenido = $${i++}`);
-      values.push(JSON.stringify(data.contenido));
-    }
     if (data.resumen !== undefined) {
       fields.push(`resumen = $${i++}`);
       values.push(data.resumen);
@@ -139,20 +214,34 @@ export const updateNoticia = async (id: number, data: Partial<NoticiaData>) => {
     if (data.publicado !== undefined) {
       fields.push(`publicado = $${i++}`);
       values.push(data.publicado);
-      if (data.publicado) {
-        fields.push(`fecha_publicacion = NOW()`);
-      }
+      if (data.publicado) fields.push(`fecha_publicacion = NOW()`);
+    }
+
+    // Procesar imágenes temp → OCI
+    let contenidoFinal = data.contenido;
+    if (data.contenido) {
+      await client.query(
+        'DELETE FROM NOTICIAS_IMAGENES WHERE id_noticia = $1 AND es_portada = false',
+        [id],
+      );
+
+      contenidoFinal = await procesarImagenesContenido(data.contenido, id, client);
+
+      fields.push(`contenido = $${i++}`);
+      values.push(JSON.stringify(contenidoFinal));
     }
 
     if (fields.length > 0) {
       values.push(id);
-      const query = `UPDATE NOTICIAS SET ${fields.join(", ")} WHERE id_noticia = $${i} RETURNING *`;
-      await client.query(query, values);
+      await client.query(
+        `UPDATE NOTICIAS SET ${fields.join(", ")} WHERE id_noticia = $${i} RETURNING *`,
+        values,
+      );
     }
 
     if (data.imagenes) {
       await client.query(
-        "DELETE FROM NOTICIAS_IMAGENES WHERE id_noticia = $1",
+        "DELETE FROM NOTICIAS_IMAGENES WHERE id_noticia = $1 AND es_portada = true",
         [id],
       );
       for (const img of data.imagenes) {
@@ -164,7 +253,8 @@ export const updateNoticia = async (id: number, data: Partial<NoticiaData>) => {
     }
 
     await client.query("COMMIT");
-    return true;
+    // ✅ Devuelve el JSON de EditorJS directamente (no anidado)
+    return contenidoFinal;
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;

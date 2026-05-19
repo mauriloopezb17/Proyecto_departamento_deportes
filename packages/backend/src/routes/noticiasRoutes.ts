@@ -32,4 +32,5 @@ router.delete(
   noticiaController.deleteNoticia,
 );
 
+
 export default router;
