@@ -2,7 +2,7 @@ export interface NoticiaImage {
   url_storage: string;
   es_portada: boolean;
 }
-
+//noticia.ts
 export interface NoticiaData {
   id_usuario_autor: number;
   id_categoria_noticia: number;

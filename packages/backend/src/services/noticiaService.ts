@@ -4,9 +4,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client, BUCKET_NAME, CDN_PUBLIC_URL, OCI_NAMESPACE } from "../config/oracleStorage";
 import fs from "fs";
 import path from "path";
-
-// ── Helper: sube archivo temp a OCI y lo borra del disco ─────────────────────
-
+//noticia service 
 async function subirTempAOCI(urlTemp: string): Promise<string> {
   const filename = urlTemp.replace('/temp/', '');
   const filepath = path.join(__dirname, '../../uploads/temp', filename);
@@ -19,9 +17,9 @@ async function subirTempAOCI(urlTemp: string): Promise<string> {
   const ociFilename = `cms-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.webp`;
 
   await s3Client.send(new PutObjectCommand({
-    Bucket:      BUCKET_NAME,
-    Key:         ociFilename,
-    Body:        buffer,
+    Bucket: BUCKET_NAME,
+    Key: ociFilename,
+    Body: buffer,
     ContentType: "image/webp",
   }));
 
@@ -75,7 +73,7 @@ async function procesarImagenesContenido(
   return { ...contenido, blocks };
 }
 
-// ── Queries ───────────────────────────────────────────────────────────────────
+
 
 export const getAllNoticias = async (
   soloPublicados = false,
@@ -132,7 +130,6 @@ export const getNoticiaById = async (
   return { ...noticia, imagenes: imagenesResult.rows };
 };
 
-// Devuelve { id_noticia, contenido } donde contenido es el JSON de EditorJS con URLs de OCI
 export const createNoticia = async (
   data: NoticiaData,
 ): Promise<{ id_noticia: number; contenido: any }> => {
@@ -161,7 +158,6 @@ export const createNoticia = async (
 
     const id_noticia = noticiaResult.rows[0].id_noticia;
 
-    // Subir temps a OCI y actualizar URLs en el JSON
     const contenidoFinal = await procesarImagenesContenido(data.contenido, id_noticia, client);
 
     await client.query(
@@ -179,7 +175,7 @@ export const createNoticia = async (
     }
 
     await client.query("COMMIT");
-    // ✅ Devuelve id_noticia y el JSON de EditorJS con URLs de OCI
+
     return { id_noticia, contenido: contenidoFinal };
   } catch (error) {
     await client.query("ROLLBACK");
@@ -189,14 +185,13 @@ export const createNoticia = async (
   }
 };
 
-// Devuelve el JSON de EditorJS actualizado con URLs de OCI (no un objeto anidado)
 export const updateNoticia = async (id: number, data: Partial<NoticiaData>): Promise<any> => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
     const fields: string[] = [];
-    const values: any[]    = [];
+    const values: any[] = [];
     let i = 1;
 
     if (data.id_categoria_noticia) {
@@ -217,7 +212,6 @@ export const updateNoticia = async (id: number, data: Partial<NoticiaData>): Pro
       if (data.publicado) fields.push(`fecha_publicacion = NOW()`);
     }
 
-    // Procesar imágenes temp → OCI
     let contenidoFinal = data.contenido;
     if (data.contenido) {
       await client.query(
@@ -253,7 +247,7 @@ export const updateNoticia = async (id: number, data: Partial<NoticiaData>): Pro
     }
 
     await client.query("COMMIT");
-    // ✅ Devuelve el JSON de EditorJS directamente (no anidado)
+
     return contenidoFinal;
   } catch (error) {
     await client.query("ROLLBACK");
@@ -277,4 +271,26 @@ export const getCategorias = async () => {
     "SELECT * FROM CATEGORIAS_NOTICIA ORDER BY nombre ASC",
   );
   return result.rows;
+};
+
+export const getNoticiasByUsuario = async (id_usuario: number): Promise<NoticiaResponse[]> => {
+  const result = await pool.query(`
+    SELECT n.*, c.nombre as categoria_nombre, p.nombres as autor_nombre, p.ape_paterno as autor_apellido
+    FROM NOTICIAS n
+    JOIN CATEGORIAS_NOTICIA c ON n.id_categoria_noticia = c.id_categoria_noticia
+    JOIN USUARIOS u ON n.id_usuario_autor = u.id_usuario
+    JOIN PERSONAS p ON u.id_persona = p.id_persona
+    WHERE n.id_usuario_autor = $1
+    ORDER BY n.fecha_creacion DESC
+  `, [id_usuario]);
+
+  return Promise.all(
+    result.rows.map(async (noticia) => {
+      const imgResult = await pool.query(
+        "SELECT url_storage FROM NOTICIAS_IMAGENES WHERE id_noticia = $1 AND es_portada = TRUE LIMIT 1",
+        [noticia.id_noticia],
+      );
+      return { ...noticia, imagen_portada: imgResult.rows[0]?.url_storage || null };
+    }),
+  );
 };

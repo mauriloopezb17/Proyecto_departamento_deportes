@@ -5,13 +5,13 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
-import passport  from 'passport';
+import passport from 'passport';
 import './config/passport';
 import authRoutes from './routes/authRoutes';
 import noticiasRoutes from './routes/noticiasRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 
-
+//index.ts
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));

@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as noticiaController from "../controllers/noticiaController";
 import { authenticateJWT } from "../middlewares/authMiddleware";
 import { authorizeRoles } from "../middlewares/roleMiddleware";
-
+//noticia routes
 const router = Router();
 
 // pa todos
@@ -31,6 +31,6 @@ router.delete(
   authorizeRoles("Administrador"),
   noticiaController.deleteNoticia,
 );
-
+router.get("/usuario/:id_usuario", noticiaController.getNoticiasByUsuario);
 
 export default router;

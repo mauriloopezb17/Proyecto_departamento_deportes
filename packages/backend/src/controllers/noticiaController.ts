@@ -40,19 +40,19 @@ export const createNoticia = async (req: Request, res: Response) => {
     }
 
     const result = await noticiaService.createNoticia({
-      id_usuario_autor:    autorId,
+      id_usuario_autor: autorId,
       id_categoria_noticia: id_categoria_noticia ?? null,
       titulo,
       contenido,
-      resumen:  resumen || null,
+      resumen: resumen || null,
       publicado: publicado ?? false,
       imagenes: imagenes ?? [],
     });
 
     res.status(201).json({
-      message:    "Noticia creada con éxito",
+      message: "Noticia creada con éxito",
       id_noticia: result.id_noticia,
-      contenido:  result.contenido,   
+      contenido: result.contenido,
     });
   } catch (error) {
     console.error("Error al crear noticia:", error);
@@ -63,11 +63,11 @@ export const createNoticia = async (req: Request, res: Response) => {
 export const updateNoticia = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-   
+
     const contenidoFinal = await noticiaService.updateNoticia(parseInt(id, 10), req.body);
     res.json({
-      message:   "Noticia actualizada con éxito",
-      contenido: contenidoFinal,   
+      message: "Noticia actualizada con éxito",
+      contenido: contenidoFinal,
     });
   } catch (error) {
     console.error("Error al actualizar noticia:", error);
@@ -95,6 +95,18 @@ export const getCategorias = async (_req: Request, res: Response) => {
     res.json(categorias);
   } catch (error) {
     console.error("Error al obtener categorías:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+export const getNoticiasByUsuario = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id_usuario as string, 10);
+    if (isNaN(id)) return res.status(400).json({ error: "ID de usuario inválido" });
+
+    const noticias = await noticiaService.getNoticiasByUsuario(id);
+    res.json(noticias);
+  } catch (error) {
+    console.error("Error al obtener noticias del usuario:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };
