@@ -10,8 +10,9 @@ import './config/passport';
 import authRoutes from './routes/authRoutes';
 import noticiasRoutes from './routes/noticiasRoutes';
 import uploadRoutes from './routes/uploadRoutes';
+import adminRoutes from './routes/adminRoutes';
+import partidosRoutes from './routes/partidosRoutes';
 
-//index.ts
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -24,6 +25,8 @@ app.use('/temp', express.static(path.join(__dirname, '../uploads/temp')));
 app.use('/api/auth', authRoutes);
 app.use('/api/noticias', noticiasRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/partidos', partidosRoutes);
 
 /*app.get('/api/auth/google', passport.authenticate('google',{scope: ['profile', 'email']}));
 
