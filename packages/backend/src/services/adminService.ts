@@ -7,6 +7,7 @@ export const inscribirDeportistaExterno = async (data: any) => {
   
   try {
     await client.query('BEGIN');
+    
     const personaRes = await client.query(`
       INSERT INTO PERSONAS (nombres, ape_paterno, ape_materno, fecha_nacimiento, celular, ci, complemento)
       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_persona
@@ -15,11 +16,13 @@ export const inscribirDeportistaExterno = async (data: any) => {
       data.deportista.fecha_nacimiento, data.deportista.celular, data.deportista.ci, data.deportista.complemento
     ]);
     const idPersona = personaRes.rows[0].id_persona;
+    
     const hashPassword = await bcrypt.hash(data.deportista.ci.toString(), 10);
     await client.query(`
       INSERT INTO USUARIOS (id_persona, id_rol, email, hash_password, activo)
       VALUES ($1, 4, $2, $3, TRUE)
     `, [idPersona, data.deportista.email, hashPassword]);
+    
     let idPersonaTutor = null;
     if (data.tutor && data.tutor.nombres) {
       const tutorRes = await client.query(`
@@ -39,6 +42,7 @@ export const inscribirDeportistaExterno = async (data: any) => {
         `, [idPersonaTutor, data.tutor.email, hashPassTutor]);
       }
     }
+    
     const deportistaRes = await client.query(`
       INSERT INTO DEPORTISTAS (id_persona, id_persona_tutor, tipo_deportista, talla_ropa)
       VALUES ($1, $2, 'Externo', $3) RETURNING id_deportista
@@ -49,10 +53,36 @@ export const inscribirDeportistaExterno = async (data: any) => {
       INSERT INTO DEPORTISTAS_EXTERNOS (id_deportista, colegio_instituto, curso)
       VALUES ($1, $2, $3)
     `, [idDeportista, data.deportista.colegio_instituto, data.deportista.curso]);
+    
     await client.query(`
       INSERT INTO INSCRIPCIONES (id_deportista, id_disciplina, id_categoria, fecha_inscripcion, estado)
       VALUES ($1, $2, $3, CURRENT_DATE, 'Activo')
     `, [idDeportista, data.inscripcion.id_disciplina, data.inscripcion.id_categoria]);
+
+    if (data.ficha_medica && data.ficha_medica.tipo_sangre) {
+      await client.query(`
+        INSERT INTO FICHAS_MEDICAS (
+          id_deportista, tipo_sangre, seguro_medico, enfermedades_padecimientos, 
+          contacto_emergencia_nombre, contacto_emergencia_telefono
+        ) VALUES ($1, $2, $3, $4, $5, $6)
+      `, [
+        idDeportista, data.ficha_medica.tipo_sangre, data.ficha_medica.seguro_medico || null,
+        data.ficha_medica.enfermedades_padecimientos || null, 
+        data.ficha_medica.contacto_emergencia_nombre, data.ficha_medica.contacto_emergencia_telefono
+      ]);
+    }
+
+    if (data.experiencias && Array.isArray(data.experiencias) && data.experiencias.length > 0) {
+      for (const exp of data.experiencias) {
+        await client.query(`
+          INSERT INTO HISTORIAL_EXPERIENCIA_DEPORTIVA (
+            id_deportista, tipo_participacion, gestion, club_sede, categoria_jugada
+          ) VALUES ($1, $2, $3, $4, $5)
+        `, [
+          idDeportista, exp.tipo_participacion, exp.gestion, exp.club_sede, exp.categoria_jugada || null
+        ]);
+      }
+    }
 
     await client.query('COMMIT');
     return { success: true, message: 'Deportista inscrito correctamente', id_deportista: idDeportista };
