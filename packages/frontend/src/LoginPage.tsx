@@ -74,6 +74,7 @@ function LoginPage() {
         body: JSON.stringify({ email: email.trim(), password }),
       });
       localStorage.setItem("ucb_token", data.token);
+      console.log("JWT Token:", data.token);
       refreshAuth();
       const dest = data.user?.id_rol === 1 ? "/admin" : "/";
       navigate(dest, { replace: true });

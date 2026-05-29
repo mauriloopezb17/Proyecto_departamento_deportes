@@ -15,6 +15,7 @@ function AuthCallback() {
     if (token) {
       try {
         localStorage.setItem('ucb_token', token)
+        console.log("JWT Token:", token);
         refreshAuth()
         const payload = JSON.parse(
           atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')),

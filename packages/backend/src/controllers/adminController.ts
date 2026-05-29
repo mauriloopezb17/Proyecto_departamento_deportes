@@ -111,3 +111,28 @@ export const registrarHorarioEntrenamiento = async (req: Request, res: Response)
     res.status(500).json({ error: 'Error interno al guardar el horario' });
   }
 };
+
+export const cambiarEstadoDeportista = async (req: Request, res: Response) => {
+  try {
+    const idDeportista = parseInt(req.params.id as string, 10);
+    
+    if (isNaN(idDeportista)) {
+      return res.status(400).json({ error: 'ID de deportista inválido' });
+    }
+
+    const actualizados = await adminService.alternarEstadoDeportista(idDeportista);
+
+    if (actualizados.length === 0) {
+      return res.status(404).json({ error: 'No se encontraron inscripciones para este deportista' });
+    }
+
+    res.json({ 
+      message: 'Estado actualizado correctamente', 
+      nuevo_estado: actualizados[0].estado 
+    });
+
+  } catch (error) {
+    console.error('Error al cambiar el estado del deportista:', error);
+    res.status(500).json({ error: 'Error interno del servidor al actualizar estado' });
+  }
+};

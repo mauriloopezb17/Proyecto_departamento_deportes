@@ -1,10 +1,10 @@
 import {
-  Award,
   ClipboardList,
-  Users,
   CheckCircle2,
   FileText,
   MessageCircle,
+  Key,
+  MapPin
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
@@ -14,26 +14,26 @@ type Step = { Icon: LucideIcon; title: string; body: string }
 
 const steps: Step[] = [
   {
-    Icon: Award,
-    title: 'Elige tu Disciplina',
-    body: 'Revisa los horarios de entrenamiento y asegúrate de que se ajusten a tu carga académica semestral.',
+    Icon: MapPin,
+    title: 'Ve al Departamento',
+    body: 'Ve al departamento de deportes de la universidad y habla con el encargado.',
   },
   {
     Icon: ClipboardList,
-    title: 'Prepara tus Documentos',
-    body: 'Ten lista la documentación requerida antes de acercarte al Departamento de Deportes.',
+    title: 'Entrega tus Datos',
+    body: 'Entrégale los datos al encargado de deportes de la universidad. Si es que hubiese un tutor, entrégale los datos de él también.',
   },
   {
-    Icon: Users,
-    title: 'Habla con el Personal',
-    body: 'Acercate al Departamento de Deportes UCB con tus documentos y te ayudamos a completar la inscripción.',
+    Icon: Key,
+    title: 'Inicia Sesión',
+    body: 'Inicia tu sesión en el sistema. La contraseña inicial es tu número de documento, y luego cambia tu contraseña.',
   },
 ]
 
 const requirements = [
-  'Ser estudiante regular inscrito en el semestre actual.',
-  'Fotocopia simple de Cédula de Identidad.',
-  'Seguro contra accidentes vigente (Universitario o Privado).',
+  'Documento de identidad.',
+  'Carnet del seguro médico (si es que tuviese).',
+  'Historial de experiencia deportiva, en caso que hayas participado en algún otro club.',
 ]
 
 function Inscribete() {
@@ -45,53 +45,67 @@ function Inscribete() {
       />
 
       <div className="container inscribete-container">
-        <div className="steps-grid">
-          {steps.map(({ Icon, title, body }, i) => (
-            <div key={i} className="step-card reveal">
-              <div className="step-icon">
-                <Icon size={28} />
-              </div>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="requirements-box reveal">
-          <div className="req-text">
-            <h2>Requisitos Obligatorios</h2>
-            <p>
-              Para garantizar un entorno seguro y competitivo, todos los
-              atletas deben cumplir con los siguientes requisitos antes de la
-              primera práctica:
-            </p>
-            <ul className="req-list">
-              {requirements.map((r, i) => (
-                <li key={i}>
-                  <CheckCircle2 size={20} /> {r}
-                </li>
+        <div className="inscribete-layout">
+          
+          {/* Left Column: Steps */}
+          <div className="inscribete-steps-section reveal">
+            <h2>Pasos de Inscripción</h2>
+            <div className="vertical-steps">
+              {steps.map(({ Icon, title, body }, i) => (
+                <div key={i} className="vertical-step">
+                  <div className="vertical-step-icon">
+                    <Icon size={24} />
+                  </div>
+                  <div className="vertical-step-content">
+                    <h3>{title}</h3>
+                    <p>{body}</p>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
-          <div className="req-icon-side">
-            <FileText size={100} />
-          </div>
-        </div>
 
-        <div className="cta-section">
-          <div className="cta-icon">
-            <MessageCircle size={40} />
+          {/* Right Column: Info Cards */}
+          <div className="inscribete-info-section reveal">
+            
+            {/* Requirements Card */}
+            <div className="info-card">
+              <div className="info-card-header">
+                <FileText size={24} />
+                <h3>Requisitos Obligatorios</h3>
+              </div>
+              <div className="info-card-body">
+                <p className="req-intro">
+                  Ten los siguientes datos presentes antes de acercarte al departamento (<strong>no es necesario que traigas los documentos originales</strong>):
+                </p>
+                <ul className="req-list">
+                  {requirements.map((r, i) => (
+                    <li key={i}>
+                      <CheckCircle2 size={18} />
+                      <span>{r}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Map Placeholder Card */}
+            <div className="info-card">
+              <div className="info-card-header" style={{ background: 'var(--ucb-yellow)', color: 'var(--ucb-blue)' }}>
+                <MapPin size={24} />
+                <h3 style={{ color: 'var(--ucb-blue)' }}>¿Dónde nos encontramos?</h3>
+              </div>
+              <div className="info-card-body" style={{ padding: 0 }}>
+                <img 
+                  src="/ucb-assets/mapa.png" 
+                  alt="Mapa de ubicación del Departamento de Deportes UCB" 
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
+              </div>
+            </div>
+
           </div>
-          <h2>¿Listo para inscribirte?</h2>
-          <p>
-            Cuando tengas todos tus requisitos listos, acercate al
-            <strong> Departamento de Deportes UCB</strong>. Nuestro personal te
-            ayudará a completar tu inscripción de forma presencial.
-          </p>
-          <p className="cta-note">
-            La inscripción es realizada por el personal del departamento, no
-            hay formulario en línea.
-          </p>
+          
         </div>
       </div>
     </>

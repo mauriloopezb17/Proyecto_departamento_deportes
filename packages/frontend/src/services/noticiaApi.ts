@@ -63,7 +63,7 @@ export async function uploadImagen(file: File): Promise<string> {
   });
 
   const data = await handleRes<{ url: string }>(res);
-  return data.url;
+  return `${API_BASE}${data.url}`;
 }
 
 /**

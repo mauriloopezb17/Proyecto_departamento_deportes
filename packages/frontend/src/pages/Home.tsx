@@ -10,7 +10,14 @@ import {
 import { apiFetch } from '../utils/api'
 import './Home.css'
 
-const players: any[] = []
+interface JugadorDestacado {
+  id_deportista: number
+  nombres: string
+  ape_paterno: string
+  url_foto: string | null
+  nombre_disciplina: string
+  nombre_categoria: string | null
+}
 
 interface Noticia {
   id_noticia: number
@@ -56,6 +63,7 @@ function Home() {
   const [slide, setSlide]               = useState(0)
   const [resultados, setResultados]     = useState<Resultado[]>([])
   const [proximos, setProximos]         = useState<ProximoPartido[]>([])
+  const [jugadores, setJugadores]       = useState<JugadorDestacado[]>([])
 
   useEffect(() => {
     apiFetch<Noticia[]>('/api/noticias?publicado=true')
@@ -69,6 +77,9 @@ function Home() {
       .catch(() => {})
     apiFetch<ProximoPartido[]>('/api/partidos/proximos')
       .then(setProximos)
+      .catch(() => {})
+    apiFetch<JugadorDestacado[]>('/api/deportistas/destacados')
+      .then(d => setJugadores(d.slice(0, 6)))
       .catch(() => {})
   }, [])
 
@@ -219,21 +230,24 @@ function Home() {
 
         <h2 className="section-title reveal">Jugadores Destacados</h2>
         <section className="home-players-grid">
-          {players.length > 0 ? (
-            players.map((p, i) => (
-              <article key={i} className="home-player-card">
+          {jugadores.length > 0 ? (
+            jugadores.map((j) => (
+              <article key={j.id_deportista} className="home-player-card">
                 <div className="home-player-photo">
-                  <User size={80} />
+                  {j.url_foto
+                    ? <img src={j.url_foto} alt={j.nombres} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                    : <User size={80} />
+                  }
                 </div>
                 <div className="home-player-info">
-                  <h4>{p.name}</h4>
-                  <span className="home-player-sport">{p.sport}</span>
-                  <span className="home-player-stat">{p.stat}</span>
+                  <h4>{j.nombres} {j.ape_paterno}</h4>
+                  <span className="home-player-sport">{j.nombre_disciplina}</span>
+                  {j.nombre_categoria && <span className="home-player-stat">{j.nombre_categoria}</span>}
                 </div>
               </article>
             ))
           ) : (
-            <p className="empty-state" style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '2rem', color: '#64748b' }}>Vacío</p>
+            <p className="empty-state" style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '2rem', color: '#64748b' }}>Sin jugadores destacados aún.</p>
           )}
         </section>
         <div className="section-footer">

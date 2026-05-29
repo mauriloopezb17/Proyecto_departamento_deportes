@@ -38,6 +38,7 @@ function App() {
             <Route path="/admin/mis-noticias" element={<MisNoticias />} />
             <Route path="/admin/registrar-usuario" element={<RegistrarUsuario />} />
             <Route path="/admin/deportistas" element={<AdminDeportistas />} />
+            <Route path="/admin/galeria" element={<AdminGaleria />} />
             <Route path="/admin/galeria/:tipo" element={<AdminGaleria />} />
             <Route path="/admin/entrenadores" element={<AdminEntrenadores />} />
             <Route path="/admin/horarios" element={<AdminHorarios />} />

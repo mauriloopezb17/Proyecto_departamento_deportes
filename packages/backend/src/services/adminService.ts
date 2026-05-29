@@ -222,3 +222,20 @@ export const crearHorarioEntrenamiento = async (data: any) => {
   const result = await pool.query(query, values);
   return result.rows[0];
 };
+
+export const alternarEstadoDeportista = async (idDeportista: number) => {
+  const query = `
+    UPDATE INSCRIPCIONES
+    SET estado = CASE
+        WHEN estado = 'Activo' THEN 'Abandono'
+        WHEN estado = 'Abandono' THEN 'Desactivado'
+        WHEN estado IN ('Desactivado', 'Desactivo', 'Baja') THEN 'Activo'
+        ELSE 'Activo' -- Valor por defecto si hubiera algún otro texto
+    END
+    WHERE id_deportista = $1
+    RETURNING id_inscripcion, id_deportista, estado;
+  `;
+  
+  const result = await pool.query(query, [idDeportista]);
+  return result.rows;
+};

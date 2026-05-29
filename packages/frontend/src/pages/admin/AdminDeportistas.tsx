@@ -136,18 +136,27 @@ function AdminDeportistas() {
       .finally(() => setListLoading(false))
   }
 
+  function isActivo(estado: string | null) {
+    return estado === 'Activo'
+  }
+
+  function nextEstadoLabel(estado: string | null) {
+    if (estado === 'Activo') return 'Abandono'
+    if (estado === 'Abandono') return 'Desactivado'
+    return 'Activo'
+  }
+
   async function toggleEstado(d: Deportista) {
-    const nuevoEstado = d.estado_inscripcion === 'Activo' ? 'Inactivo' : 'Activo'
     setListAlert(null)
     setTogglingId(d.id_deportista)
     try {
-      await apiFetch(`/api/admin/deportistas/${d.id_deportista}/estado`, {
-        method: 'PATCH',
-        body: JSON.stringify({ estado: nuevoEstado }),
-      })
+      const data = await apiFetch<{ nuevo_estado: string }>(
+        `/api/admin/deportistas/${d.id_deportista}/estado`,
+        { method: 'PATCH' }
+      )
       setDeportistas(prev =>
         prev.map(x => x.id_deportista === d.id_deportista
-          ? { ...x, estado_inscripcion: nuevoEstado }
+          ? { ...x, estado_inscripcion: data.nuevo_estado }
           : x)
       )
     } catch (err: any) {
@@ -383,7 +392,7 @@ function AdminDeportistas() {
                 </thead>
                 <tbody>
                   {deportistasFiltrados.map(d => {
-                    const isActivo = d.estado_inscripcion === 'Activo'
+                    const activo = isActivo(d.estado_inscripcion)
                     const isToggling = togglingId === d.id_deportista
                     const isDeleting = deletingId === d.id_deportista
                     return (
@@ -401,8 +410,8 @@ function AdminDeportistas() {
                               type="button"
                               onClick={() => toggleEstado(d)}
                               disabled={isToggling}
-                              className={`admin-estado-toggle ${isActivo ? 'activo' : 'inactivo'}`}
-                              title={`Cambiar a ${isActivo ? 'Inactivo' : 'Activo'}`}
+                              className={`admin-estado-toggle ${activo ? 'activo' : 'inactivo'}`}
+                              title={`Siguiente: ${nextEstadoLabel(d.estado_inscripcion)}`}
                             >
                               {isToggling ? '...' : d.estado_inscripcion}
                             </button>

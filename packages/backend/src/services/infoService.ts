@@ -58,7 +58,6 @@ export const getGaleriaEventos = async () => {
       fecha_subida
     FROM GALERIA_MULTIMEDIA
     WHERE publicado = TRUE 
-      AND (id_torneo IS NOT NULL OR id_partido IS NOT NULL)
     ORDER BY fecha_subida DESC;
   `;
   const result = await pool.query(query);
