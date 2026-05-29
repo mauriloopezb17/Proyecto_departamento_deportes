@@ -30,3 +30,13 @@ export const obtenerGaleriaClub = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+
+export const obtenerEspacios = async (req: Request, res: Response) => {
+  try {
+    const espacios = await infoService.getEspacios();
+    res.json(espacios);
+  } catch (error) {
+    console.error('Error al obtener espacios:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};

@@ -13,6 +13,9 @@ import noticiasRoutes from './routes/noticiasRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import adminRoutes from './routes/adminRoutes';
 import partidosRoutes from './routes/partidosRoutes';
+import deportistasRoutes from './routes/deportistaRoutes';
+import galeriaRoutes from './routes/galeriaRoutes';
+import infoRoutes from './routes/infoRoutes';
 
 const app = express();
 app.use(cors());
@@ -30,6 +33,11 @@ app.use('/api/noticias', noticiasRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/partidos', partidosRoutes);
+
+app.use('/api/partidos', partidosRoutes);
+app.use('/api/deportistas', deportistasRoutes);
+app.use('/api/galeria', galeriaRoutes);
+app.use('/api/info', infoRoutes);
 
 /*app.get('/api/auth/google', passport.authenticate('google',{scope: ['profile', 'email']}));
 

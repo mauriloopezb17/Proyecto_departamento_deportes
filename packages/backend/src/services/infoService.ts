@@ -64,3 +64,14 @@ export const getGaleriaEventos = async () => {
   const result = await pool.query(query);
   return result.rows;
 };
+
+export const getEspacios = async () => {
+  const query = `
+    SELECT id_espacio, nombre_espacio, hora_apertura 
+    FROM ESPACIOS 
+    WHERE activo = TRUE 
+    ORDER BY nombre_espacio ASC;
+  `;
+  const result = await pool.query(query);
+  return result.rows;
+};
