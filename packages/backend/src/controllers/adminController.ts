@@ -86,3 +86,28 @@ export const listarDeportistas = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Error interno del servidor al obtener la lista de deportistas' });
   }
 };
+
+export const registrarHorarioEntrenamiento = async (req: Request, res: Response) => {
+  try {
+    const { id_espacio, id_disciplina, dia_semana, hora_inicio, hora_fin, id_entrenador } = req.body;
+
+    if (!id_espacio || !id_disciplina || dia_semana === undefined || !hora_inicio || !hora_fin || !id_entrenador) {
+      return res.status(400).json({ error: 'Faltan campos obligatorios para registrar el horario' });
+    }
+
+    if (dia_semana < 1 || dia_semana > 7) {
+      return res.status(400).json({ error: 'El día de la semana debe estar entre 1 (Lunes) y 7 (Domingo)' });
+    }
+
+    const nuevoHorario = await adminService.crearHorarioEntrenamiento(req.body);
+    
+    res.status(201).json({ 
+      message: 'Horario de entrenamiento registrado exitosamente', 
+      data: nuevoHorario 
+    });
+
+  } catch (error: any) {
+    console.error('Error al registrar horario:', error);
+    res.status(500).json({ error: 'Error interno al guardar el horario' });
+  }
+};

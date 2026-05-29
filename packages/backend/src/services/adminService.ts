@@ -187,3 +187,38 @@ export const getListaDeportistas = async () => {
   const result = await pool.query(query);
   return result.rows;
 };
+
+export const crearHorarioEntrenamiento = async (data: any) => {
+  const query = `
+    INSERT INTO PLANTILLA_HORARIOS_FIJOS (
+      id_espacio, 
+      id_disciplina, 
+      dia_semana, 
+      hora_inicio, 
+      hora_fin, 
+      id_tipo_bloqueo, 
+      id_entrenador
+    ) 
+    VALUES (
+      $1, 
+      $2, 
+      $3, 
+      $4, 
+      $5, 
+      (SELECT id_tipo_bloqueo FROM TIPOS_BLOQUEO WHERE nombre_bloqueo = 'Entrenamiento' LIMIT 1), 
+      $6
+    ) RETURNING *;
+  `;
+  
+  const values = [
+    data.id_espacio,
+    data.id_disciplina,
+    data.dia_semana,     
+    data.hora_inicio,     
+    data.hora_fin,        
+    data.id_entrenador   
+  ];
+
+  const result = await pool.query(query, values);
+  return result.rows[0];
+};
