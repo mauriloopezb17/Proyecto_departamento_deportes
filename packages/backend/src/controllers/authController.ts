@@ -132,8 +132,11 @@ export const verifyResetCode = async (req: Request, res: Response) => {
 
   try {
     const resetToken = await validarCodigo(email, codigo);
+    if (resetToken === 'expirado') {
+      return res.status(400).json({ valid: false, error: 'El código ha expirado, solicitá uno nuevo' });
+    }
     if (!resetToken) {
-      return res.status(400).json({ valid: false, error: 'Código inválido o expirado' });
+      return res.status(400).json({ valid: false, error: 'Código incorrecto o ya fue utilizado' });
     }
     res.json({ valid: true, reset_token: resetToken });
   } catch (error) {

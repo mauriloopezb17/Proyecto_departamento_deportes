@@ -32,14 +32,25 @@ export const crearCodigoReset = async (email: string): Promise<string> => {
 };
 
 
-export const validarCodigo = async (email: string, codigo: string): Promise<string | null> => {
-  const result = await pool.query(
-    `SELECT id FROM CODIGOS_RESET_PASSWORD
-     WHERE email = $1 AND codigo = $2 AND usado = FALSE AND expira_en > NOW()`,
+export const validarCodigo = async (email: string, codigo: string): Promise<string | null | 'expirado'> => {
+  // Primero verificar si el código existe y no fue usado (sin importar expiración)
+  const existeResult = await pool.query(
+    `SELECT id, expira_en, usado FROM CODIGOS_RESET_PASSWORD
+     WHERE email = $1 AND codigo = $2`,
     [email, codigo]
   );
 
-  if (result.rows.length === 0) return null;
+  if (existeResult.rows.length === 0) return null; // código incorrecto
+
+  const row = existeResult.rows[0];
+
+  if (row.usado) return null; // ya fue usado
+
+  const ahora = new Date();
+  const expiraEn = new Date(row.expira_en);
+  if (ahora > expiraEn) return 'expirado'; // expiró
+
+  const result = { rows: [{ id: row.id }] };
 
   await pool.query(
     `UPDATE CODIGOS_RESET_PASSWORD SET usado = TRUE WHERE id = $1`,
