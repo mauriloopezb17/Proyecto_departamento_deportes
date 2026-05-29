@@ -63,7 +63,7 @@ app.get('/api/auth/google/callback',
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`ados corriendose en http://localhost:${PORT}`);
+  console.log(`backend: http://localhost:${PORT}`);
   console.log(`OAuth2 para @ucb.edu.bo`);
 });
 app.get('/api', (req, res) => {
