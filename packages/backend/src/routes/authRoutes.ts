@@ -1,12 +1,15 @@
 import { Router } from 'express';
 import passport from 'passport';
-import { googleCallback, login, register } from '../controllers/authController';
+import { googleCallback, login, register, forgotPassword, verifyResetCode, resetPassword } from '../controllers/authController';
 import { authenticateJWT } from '../middlewares/authMiddleware';
 
 const router = Router();
 
 router.post('/login', login);
 router.post('/register', register);
+router.post('/forgot-password', forgotPassword);
+router.post('/verify-reset-code', verifyResetCode);
+router.post('/reset-password', resetPassword);
 
 // Ruta de login con Google
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
