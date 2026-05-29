@@ -384,6 +384,12 @@
   box-shadow: 0 0 0 3px rgba(1, 63, 98, 0.08);
 }
 
+textarea.admin-input {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
 .admin-btn-primary {
   width: fit-content;
   padding: 11px 28px;

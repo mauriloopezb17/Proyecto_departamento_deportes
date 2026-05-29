@@ -73,7 +73,7 @@ export const getTorneos = async () => {
   const query = `
     SELECT id_torneo, nombre, id_disciplina 
     FROM TORNEOS 
-    WHERE estado IN ('Planificado', 'En Curso', 'Finalizado') 
+    WHERE estado IN ('Planificado', 'En Curso', 'Finalizado')
     ORDER BY nombre ASC;
   `;
   const result = await pool.query(query);

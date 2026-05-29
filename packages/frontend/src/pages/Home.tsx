@@ -10,8 +10,6 @@ import {
 import { apiFetch } from '../utils/api'
 import './Home.css'
 
-const lastResults: any[] = []
-const upcomingMatches: any[] = []
 const players: any[] = []
 
 interface Noticia {
@@ -22,13 +20,51 @@ interface Noticia {
   imagen_portada: string | null
 }
 
+interface Resultado {
+  id_partido: number
+  fecha: string
+  hora_inicio: string
+  equipo_local: string
+  equipo_visitante: string
+  goles_local: number
+  goles_visitante: number
+  disciplina: string
+  torneo_nombre: string
+}
+
+interface ProximoPartido {
+  id_partido: number
+  fecha: string
+  hora_inicio: string
+  equipo_local: string
+  equipo_visitante: string
+  torneo_nombre: string
+  espacio: string | null
+}
+
+function fmtFecha(iso: string) {
+  return new Date(iso).toLocaleDateString('es-BO', { day: '2-digit', month: 'short' })
+}
+
+function fmtHora(t: string) {
+  return t?.slice(0, 5) ?? ''
+}
+
 function Home() {
-  const [noticias, setNoticias] = useState<Noticia[]>([])
-  const [slide, setSlide] = useState(0)
+  const [noticias, setNoticias]         = useState<Noticia[]>([])
+  const [slide, setSlide]               = useState(0)
+  const [resultados, setResultados]     = useState<Resultado[]>([])
+  const [proximos, setProximos]         = useState<ProximoPartido[]>([])
 
   useEffect(() => {
     apiFetch<Noticia[]>('/api/noticias?publicado=true')
       .then((data) => setNoticias(data.slice(0, 5)))
+      .catch(() => {})
+    apiFetch<Resultado[]>('/api/partidos/recientes')
+      .then(setResultados)
+      .catch(() => {})
+    apiFetch<ProximoPartido[]>('/api/partidos/proximos')
+      .then(setProximos)
       .catch(() => {})
   }, [])
 
@@ -111,31 +147,34 @@ function Home() {
         <div className="match-center">
           <div className="match-panel">
             <h3>Últimos Resultados</h3>
-            {lastResults.length > 0 ? (
-              lastResults.map((m, i) => (
-                <div key={i} className="match-card">
-                  <div className="team-info">{m.home}</div>
-                  <div className="score-box">{m.score}</div>
-                  <div className="team-info away">{m.away}</div>
+            {resultados.length > 0 ? (
+              resultados.map((m) => (
+                <div key={m.id_partido} className="match-card">
+                  <div className="team-info" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+                    <span>{m.equipo_local}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{m.disciplina}</span>
+                  </div>
+                  <div className="score-box">{m.goles_local} – {m.goles_visitante}</div>
+                  <div className="team-info away">{m.equipo_visitante}</div>
                 </div>
               ))
             ) : (
-              <p className="empty-state" style={{ textAlign: 'center', padding: '1rem', color: '#64748b' }}>Vacío</p>
+              <p className="empty-state" style={{ textAlign: 'center', padding: '1rem', color: '#64748b' }}>No hay resultados disponibles</p>
             )}
           </div>
           <div className="match-panel">
-            <h3>Próximos Partidos (Intercarreras)</h3>
-            {upcomingMatches.length > 0 ? (
-              upcomingMatches.map((m, i) => (
-                <div key={i} className="match-card wrap">
-                  <span className="match-meta">{m.meta}</span>
-                  <div className="team-info">{m.home}</div>
-                  <div className="time-box">{m.time}</div>
-                  <div className="team-info away">{m.away}</div>
+            <h3>Próximos Partidos</h3>
+            {proximos.length > 0 ? (
+              proximos.map((m) => (
+                <div key={m.id_partido} className="match-card wrap">
+                  <span className="match-meta">{fmtFecha(m.fecha)} · {m.torneo_nombre}</span>
+                  <div className="team-info">{m.equipo_local}</div>
+                  <div className="time-box">{fmtHora(m.hora_inicio)}</div>
+                  <div className="team-info away">{m.equipo_visitante}</div>
                 </div>
               ))
             ) : (
-              <p className="empty-state" style={{ textAlign: 'center', padding: '1rem', color: '#64748b' }}>Vacío</p>
+              <p className="empty-state" style={{ textAlign: 'center', padding: '1rem', color: '#64748b' }}>No hay partidos programados</p>
             )}
           </div>
         </div>

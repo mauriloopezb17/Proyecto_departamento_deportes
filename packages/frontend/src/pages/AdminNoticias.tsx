@@ -130,6 +130,7 @@ const AdminNoticias: React.FC = () => {
     setId(n.id_noticia);
     setCategoriaId(n.id_categoria_noticia);
     setInitialEditorData(n.contenido ?? undefined);
+    setNewsData(n.contenido ?? null);
     setEditorKey(k => k + 1);
     setSaveStatus('guardado');
     setListStatus(null);
@@ -151,6 +152,7 @@ const AdminNoticias: React.FC = () => {
   const resetEditor = () => {
     setId(null);
     setInitialEditorData(undefined);
+    setNewsData(null);
     setEditorKey(k => k + 1);
     setSaveStatus('nuevo');
   };
@@ -198,6 +200,7 @@ useEffect(() => {
         onPublish={handlePublish}
         saveStatus={saveStatus}
         userName={displayName}
+        onBack={() => navigate('/admin')}
       />
 
       <div className="an-body">

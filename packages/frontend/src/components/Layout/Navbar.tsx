@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, Eye, EyeOff, LogOut, Menu, X, Loader2 } from 'lucide-react';
+import { Upload, Eye, EyeOff, LogOut, Menu, X, Loader2, ArrowLeft } from 'lucide-react';
 import '../Layout/CSS/Navbar.css';
 
 export type SaveStatus =
@@ -16,6 +16,7 @@ interface NavbarProps {
   isShowingPreview: boolean;
   saveStatus:       SaveStatus;
   userName?:        string;
+  onBack?:          () => void;
 }
 
 const STATUS_LABEL: Record<SaveStatus, string> = {
@@ -44,6 +45,7 @@ const Navbar: React.FC<NavbarProps> = ({
   isShowingPreview,
   saveStatus,
   userName = 'Usuario',
+  onBack,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -67,6 +69,15 @@ const Navbar: React.FC<NavbarProps> = ({
   return (
     <nav className="navbar-cms">
       <div className="navbar-left">
+        {onBack && (
+          <>
+            <button className="back-admin-btn" onClick={onBack} title="Volver al panel de administración">
+              <ArrowLeft size={15} />
+              <span>Volver</span>
+            </button>
+            <div className="navbar-divider" />
+          </>
+        )}
         <span className="welcome-text">Hola, <strong>{userName}</strong></span>
         <div className="navbar-divider" />
         <span className="navbar-page-title">Noticias</span>

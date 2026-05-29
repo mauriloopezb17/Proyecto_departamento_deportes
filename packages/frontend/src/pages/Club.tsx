@@ -334,14 +334,6 @@ function PlayersTab() {
             <option>Ajedrez</option>
           </select>
         </div>
-        <div className="filter-group">
-          <label htmlFor="genero"><strong>Género:</strong></label>
-          <select id="genero">
-            <option>Todos</option>
-            <option>Masculino</option>
-            <option>Femenino</option>
-          </select>
-        </div>
       </div>
 
       <div className="players-grid">

@@ -10,6 +10,11 @@ import {
   Shield,
   Image as ImageIcon,
   Video,
+  UserCog,
+  Clock,
+  CalendarDays,
+  BarChart2,
+  Trophy,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import '../CSS/Admin.css'
@@ -53,18 +58,52 @@ const sections = [
     description: 'Redacción y administración de noticias publicadas.',
     cards: [
       {
-        title: 'Publicar Noticia',
-        desc: 'Redactar y publicar noticias en el portal.',
+        title: 'Gestor de Noticias',
+        desc: 'Redactar, gestionar y publicar noticias en el portal.',
         icon: Newspaper,
         to: '/noticiasAdmin',
         accent: 'yellow',
       },
+    ],
+  },
+  {
+    title: 'Competición',
+    description: 'Entrenadores, horarios, partidos y estadísticas de torneos.',
+    cards: [
       {
-        title: 'Mis Noticias',
-        desc: 'Ver todas las noticias que has publicado.',
-        icon: BookOpen,
-        to: '/admin/mis-noticias',
-        accent: 'yellow',
+        title: 'Entrenadores',
+        desc: 'Gestionar el cuerpo técnico del departamento.',
+        icon: UserCog,
+        to: '/admin/entrenadores',
+        accent: 'blue',
+      },
+      {
+        title: 'Horarios',
+        desc: 'Crear y editar los horarios de entrenamiento.',
+        icon: Clock,
+        to: '/admin/horarios',
+        accent: 'blue',
+      },
+      {
+        title: 'Partidos',
+        desc: 'Crear partidos y cargar resultados en el calendario.',
+        icon: CalendarDays,
+        to: '/admin/partidos',
+        accent: 'blue',
+      },
+      {
+        title: 'Crear Torneo',
+        desc: 'La creación de torneos corresponde al grupo 2.',
+        icon: Trophy,
+        to: '#',
+        accent: 'blue',
+      },
+      {
+        title: 'Torneo & Estadísticas',
+        desc: 'Actualizar posiciones, goleadores y tarjetas.',
+        icon: BarChart2,
+        to: '/admin/torneo',
+        accent: 'blue',
       },
     ],
   },

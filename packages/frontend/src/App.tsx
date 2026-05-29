@@ -15,6 +15,10 @@ import MisNoticias from './pages/admin/MisNoticias'
 import RegistrarUsuario from './pages/admin/RegistrarUsuario'
 import AdminDeportistas from './pages/admin/AdminDeportistas'
 import AdminGaleria from './pages/admin/AdminGaleria'
+import AdminEntrenadores from './pages/admin/AdminEntrenadores'
+import AdminHorarios from './pages/admin/AdminHorarios'
+import AdminPartidos from './pages/admin/AdminPartidos'
+import AdminTorneo from './pages/admin/AdminTorneo'
 
 function App() {
   return (
@@ -35,6 +39,10 @@ function App() {
             <Route path="/admin/registrar-usuario" element={<RegistrarUsuario />} />
             <Route path="/admin/deportistas" element={<AdminDeportistas />} />
             <Route path="/admin/galeria/:tipo" element={<AdminGaleria />} />
+            <Route path="/admin/entrenadores" element={<AdminEntrenadores />} />
+            <Route path="/admin/horarios" element={<AdminHorarios />} />
+            <Route path="/admin/partidos" element={<AdminPartidos />} />
+            <Route path="/admin/torneo" element={<AdminTorneo />} />
           </Route>
           <Route path="/noticiasAdmin" element={<AdminNoticias />} />
           <Route path="*" element={<Navigate to="/" replace />} />

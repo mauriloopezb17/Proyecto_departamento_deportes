@@ -11,10 +11,19 @@ type Props = {
   tabs: TabDef[]
   defaultTab?: string
   align?: 'left' | 'center'
+  onChange?: (id: string) => void
 }
 
-function Tabs({ tabs, defaultTab, align = 'left' }: Props) {
+function Tabs({ tabs, defaultTab, align = 'left', onChange }: Props) {
   const [active, setActive] = useState(defaultTab ?? tabs[0]?.id)
+
+  const handleTabClick = (id: string) => {
+    setActive(id)
+    if (onChange) {
+      onChange(id)
+    }
+  }
+
   return (
     <>
       <div className={`tabs ${align === 'center' ? 'tabs-center' : ''}`}>
@@ -22,7 +31,7 @@ function Tabs({ tabs, defaultTab, align = 'left' }: Props) {
           <div
             key={t.id}
             className={`tab ${active === t.id ? 'active' : ''}`}
-            onClick={() => setActive(t.id)}
+            onClick={() => handleTabClick(t.id)}
           >
             {t.label}
           </div>
@@ -41,3 +50,4 @@ function Tabs({ tabs, defaultTab, align = 'left' }: Props) {
 }
 
 export default Tabs
+

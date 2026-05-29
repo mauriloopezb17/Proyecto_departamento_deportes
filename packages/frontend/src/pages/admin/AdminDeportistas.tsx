@@ -99,6 +99,12 @@ function AdminDeportistas() {
   const [togglingId, setTogglingId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [listAlert, setListAlert]   = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
+
+  const [filtroDisciplina, setFiltroDisciplina] = useState('Todas')
+  const [filtroCategoria, setFiltroCategoria] = useState('Todas')
+  const [filtroTipo, setFiltroTipo] = useState('Todos')
+  const [filtroGestion, setFiltroGestion] = useState('Todas')
+
   const [editing, setEditing]       = useState<Deportista | null>(null)
   const [editForm, setEditForm]     = useState({
     nombres: '', ape_paterno: '', ape_materno: '', celular: '', talla_ropa: '',
@@ -271,6 +277,20 @@ function AdminDeportistas() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
+  const disciplinasUnicas = Array.from(new Set(deportistas.map(d => d.nombre_disciplina).filter(Boolean))) as string[];
+  const categoriasUnicas = Array.from(new Set(deportistas.map(d => d.nombre_categoria).filter(Boolean))) as string[];
+  const tiposUnicos = Array.from(new Set(deportistas.map(d => d.tipo_deportista).filter(Boolean))) as string[];
+  const gestionesUnicas = Array.from(new Set(deportistas.map(d => d.fecha_inscripcion ? new Date(d.fecha_inscripcion).getFullYear().toString() : '').filter(Boolean))).sort() as string[];
+
+  const deportistasFiltrados = deportistas.filter(d => {
+    const matchDisciplina = filtroDisciplina === 'Todas' || d.nombre_disciplina === filtroDisciplina;
+    const matchCategoria = filtroCategoria === 'Todas' || d.nombre_categoria === filtroCategoria;
+    const matchTipo = filtroTipo === 'Todos' || d.tipo_deportista === filtroTipo;
+    const gestion = d.fecha_inscripcion ? new Date(d.fecha_inscripcion).getFullYear().toString() : '';
+    const matchGestion = filtroGestion === 'Todas' || gestion === filtroGestion;
+    return matchDisciplina && matchCategoria && matchTipo && matchGestion;
+  });
+
   return (
     <div className="admin-page">
       <Link to="/admin" className="admin-back-link">← Volver al panel</Link>
@@ -306,10 +326,47 @@ function AdminDeportistas() {
           )}
           {listLoading && <p className="admin-empty">Cargando...</p>}
           {listError   && <p className="admin-empty" style={{ color: '#dc2626' }}>{listError}</p>}
+          
+          {!listLoading && !listError && deportistas.length > 0 && (
+            <div className="admin-filters" style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              <div className="admin-field" style={{ flex: '1 1 150px' }}>
+                <label>Disciplina</label>
+                <select className="admin-select" value={filtroDisciplina} onChange={e => setFiltroDisciplina(e.target.value)}>
+                  <option value="Todas">Todas</option>
+                  {disciplinasUnicas.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+              <div className="admin-field" style={{ flex: '1 1 150px' }}>
+                <label>Categoría</label>
+                <select className="admin-select" value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)}>
+                  <option value="Todas">Todas</option>
+                  {categoriasUnicas.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="admin-field" style={{ flex: '1 1 150px' }}>
+                <label>Tipo</label>
+                <select className="admin-select" value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)}>
+                  <option value="Todos">Todos</option>
+                  {tiposUnicos.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div className="admin-field" style={{ flex: '1 1 150px' }}>
+                <label>Gestión</label>
+                <select className="admin-select" value={filtroGestion} onChange={e => setFiltroGestion(e.target.value)}>
+                  <option value="Todas">Todas</option>
+                  {gestionesUnicas.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
+
           {!listLoading && !listError && deportistas.length === 0 && (
             <p className="admin-empty">No hay deportistas registrados aún.</p>
           )}
-          {!listLoading && deportistas.length > 0 && (
+          {!listLoading && !listError && deportistas.length > 0 && deportistasFiltrados.length === 0 && (
+            <p className="admin-empty">No hay deportistas que coincidan con los filtros.</p>
+          )}
+          {!listLoading && deportistasFiltrados.length > 0 && (
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
@@ -325,7 +382,7 @@ function AdminDeportistas() {
                   </tr>
                 </thead>
                 <tbody>
-                  {deportistas.map(d => {
+                  {deportistasFiltrados.map(d => {
                     const isActivo = d.estado_inscripcion === 'Activo'
                     const isToggling = togglingId === d.id_deportista
                     const isDeleting = deletingId === d.id_deportista
