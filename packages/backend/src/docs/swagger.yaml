@@ -344,6 +344,8 @@ paths:
     post:
       tags: [Noticias]
       summary: Crear una noticia
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -383,6 +385,8 @@ paths:
     put:
       tags: [Noticias]
       summary: Actualizar una noticia
+      security:
+        - bearerAuth: []
       parameters:
         - in: path
           name: id
