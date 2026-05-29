@@ -521,11 +521,6 @@ function AdminTorneo() {
                   </table>
                 </div>
               )}
-              <div style={{ marginTop: 16 }}>
-                <button type="button" className="admin-btn-primary" onClick={openPosAdd}>
-                  + Agregar equipo
-                </button>
-              </div>
             </div>
           )}
 
@@ -645,11 +640,6 @@ function AdminTorneo() {
                   </table>
                 </div>
               )}
-              <div style={{ marginTop: 16 }}>
-                <button type="button" className="admin-btn-primary" onClick={openTarAdd}>
-                  + Agregar equipo
-                </button>
-              </div>
             </div>
           )}
         </>

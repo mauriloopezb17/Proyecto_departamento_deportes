@@ -10,11 +10,8 @@ import {
   Shield,
   Image as ImageIcon,
   Video,
-  UserCog,
   Clock,
-  CalendarDays,
   BarChart2,
-  Trophy,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import '../CSS/Admin.css'
@@ -71,31 +68,10 @@ const sections = [
     description: 'Entrenadores, horarios, partidos y estadísticas de torneos.',
     cards: [
       {
-        title: 'Entrenadores',
-        desc: 'Gestionar el cuerpo técnico del departamento.',
-        icon: UserCog,
-        to: '/admin/entrenadores',
-        accent: 'blue',
-      },
-      {
         title: 'Horarios',
         desc: 'Crear y editar los horarios de entrenamiento.',
         icon: Clock,
         to: '/admin/horarios',
-        accent: 'blue',
-      },
-      {
-        title: 'Partidos',
-        desc: 'Crear partidos y cargar resultados en el calendario.',
-        icon: CalendarDays,
-        to: '/admin/partidos',
-        accent: 'blue',
-      },
-      {
-        title: 'Crear Torneo',
-        desc: 'La creación de torneos corresponde al grupo 2.',
-        icon: Trophy,
-        to: '#',
         accent: 'blue',
       },
       {
@@ -112,17 +88,10 @@ const sections = [
     description: 'Fotografías y videos del club deportivo.',
     cards: [
       {
-        title: 'Fotos',
-        desc: 'Subir y administrar fotografías de eventos y partidos.',
+        title: 'Galería multimedia',
+        desc: 'Subir y administrar fotos y videos de eventos y partidos.',
         icon: ImageIcon,
-        to: '/admin/galeria/fotos',
-        accent: 'blue',
-      },
-      {
-        title: 'Videos',
-        desc: 'Subir y administrar videos de torneos y entrenamientos.',
-        icon: Video,
-        to: '/admin/galeria/videos',
+        to: '/admin/galeria',
         accent: 'blue',
       },
     ],

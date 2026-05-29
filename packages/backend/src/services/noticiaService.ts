@@ -6,7 +6,8 @@ import fs from "fs";
 import path from "path";
 //noticia service 
 async function subirTempAOCI(urlTemp: string): Promise<string> {
-  const filename = urlTemp.replace('/temp/', '');
+  const tempIdx = urlTemp.lastIndexOf('/temp/');
+  const filename = urlTemp.substring(tempIdx + 6);
   const filepath = path.join(__dirname, '../../uploads/temp', filename);
 
   if (!fs.existsSync(filepath)) {
@@ -42,7 +43,7 @@ async function procesarImagenesContenido(
       if (block.type === 'image' && block.data?.file?.url) {
         const url = block.data.file.url;
 
-        if (url.startsWith('/temp/')) {
+        if (url.includes('/temp/')) {
           // Imagen nueva → subir a OCI
           console.log(`[TEMP] Procesando: ${url}`);
           const urlOCI = await subirTempAOCI(url);
