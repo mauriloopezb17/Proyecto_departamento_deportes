@@ -207,7 +207,6 @@
 }
 
 .torneos-container tr.leader td {
-  border-left: 4px solid var(--ucb-yellow);
   font-weight: 600;
 }
 

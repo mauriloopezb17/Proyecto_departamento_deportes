@@ -322,20 +322,45 @@ function CalendarTab({ idTorneo }: { idTorneo: number }) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
+interface Disciplina {
+  id_disciplina: number
+  nombre_disciplina: string
+}
+
 function Torneos() {
   const [torneos, setTorneos]     = useState<Torneo[]>([])
+  const [disciplinas, setDisciplinas] = useState<Disciplina[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [selectedDisciplinaId, setSelectedDisciplinaId] = useState<number | null>(null)
   const [torneosLoading, setTorneosLoading] = useState(true)
 
   useEffect(() => {
-    apiFetch<Torneo[]>('/api/partidos/torneos')
-      .then(data => {
-        setTorneos(data)
-        if (data.length > 0) setSelectedId(data[0].id_torneo)
+    Promise.all([
+      apiFetch<Torneo[]>('/api/partidos/torneos'),
+      apiFetch<Disciplina[]>('/api/partidos/disciplinas').catch(() => [])
+    ])
+      .then(([tData, dData]) => {
+        setTorneos(tData)
+        setDisciplinas(dData)
+        if (tData.length > 0) setSelectedId(tData[0].id_torneo)
       })
       .catch(() => {})
       .finally(() => setTorneosLoading(false))
   }, [])
+
+  const filteredTorneos = selectedDisciplinaId 
+    ? torneos.filter(t => t.id_disciplina === selectedDisciplinaId)
+    : torneos;
+
+  useEffect(() => {
+    if (selectedDisciplinaId !== null || selectedDisciplinaId === null) {
+      if (filteredTorneos.length > 0 && !filteredTorneos.find(t => t.id_torneo === selectedId)) {
+        setSelectedId(filteredTorneos[0].id_torneo)
+      } else if (filteredTorneos.length === 0) {
+        setSelectedId(null)
+      }
+    }
+  }, [selectedDisciplinaId, torneos])
 
   return (
     <>
@@ -345,12 +370,26 @@ function Torneos() {
         thinBorder
       />
       <div className="container torneos-container">
-        <div className="filters">
+        <div className="filters" style={{ display: 'flex', gap: '20px' }}>
+          <div className="filter-group">
+            <label htmlFor="disciplina"><strong>Disciplina:</strong></label>
+            <select
+              id="disciplina"
+              value={selectedDisciplinaId ?? ''}
+              onChange={e => setSelectedDisciplinaId(e.target.value ? Number(e.target.value) : null)}
+            >
+              <option value="">Todas</option>
+              {disciplinas.map(d => (
+                <option key={d.id_disciplina} value={d.id_disciplina}>{d.nombre_disciplina}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="filter-group">
             <label htmlFor="torneo"><strong>Torneo:</strong></label>
             {torneosLoading ? (
               <span style={{ color: '#94a3b8', fontSize: 14 }}>Cargando...</span>
-            ) : torneos.length === 0 ? (
+            ) : filteredTorneos.length === 0 ? (
               <span style={{ color: '#94a3b8', fontSize: 14 }}>No hay torneos activos</span>
             ) : (
               <select
@@ -358,7 +397,7 @@ function Torneos() {
                 value={selectedId ?? ''}
                 onChange={e => setSelectedId(Number(e.target.value))}
               >
-                {torneos.map(t => (
+                {filteredTorneos.map(t => (
                   <option key={t.id_torneo} value={t.id_torneo}>{t.nombre}</option>
                 ))}
               </select>

@@ -51,14 +51,18 @@ function fmtHora(t: string) {
 }
 
 function Home() {
-  const [noticias, setNoticias]         = useState<Noticia[]>([])
+  const [heroNoticias, setHeroNoticias] = useState<Noticia[]>([])
+  const [clubNoticias, setClubNoticias] = useState<Noticia[]>([])
   const [slide, setSlide]               = useState(0)
   const [resultados, setResultados]     = useState<Resultado[]>([])
   const [proximos, setProximos]         = useState<ProximoPartido[]>([])
 
   useEffect(() => {
     apiFetch<Noticia[]>('/api/noticias?publicado=true')
-      .then((data) => setNoticias(data.slice(0, 5)))
+      .then((data) => {
+        setHeroNoticias(data.filter(n => n.categoria_nombre === 'Destacado').slice(0, 5));
+        setClubNoticias(data.filter(n => n.categoria_nombre === 'Noticias de Club' || n.categoria_nombre === 'Noticias del Club').slice(0, 3));
+      })
       .catch(() => {})
     apiFetch<Resultado[]>('/api/partidos/recientes')
       .then(setResultados)
@@ -70,25 +74,23 @@ function Home() {
 
   // auto-advance every 6s
   useEffect(() => {
-    if (noticias.length <= 1) return
+    if (heroNoticias.length <= 1) return
     const id = setInterval(() => {
-      setSlide((s) => (s + 1) % noticias.length)
+      setSlide((s) => (s + 1) % heroNoticias.length)
     }, 6000)
     return () => clearInterval(id)
-  }, [noticias.length])
+  }, [heroNoticias.length])
 
-  const goTo  = (i: number) => setSlide(((i % noticias.length) + noticias.length) % noticias.length)
+  const goTo  = (i: number) => setSlide(((i % heroNoticias.length) + heroNoticias.length) % heroNoticias.length)
   const prev  = () => goTo(slide - 1)
   const next  = () => goTo(slide + 1)
-
-  const featuredNoticias = noticias.slice(0, 3)
 
   return (
     <>
       <header className="hero-carousel">
-        {noticias.length > 0 ? (
+        {heroNoticias.length > 0 ? (
           <>
-            {noticias.map((n, i) => (
+            {heroNoticias.map((n, i) => (
               <article
                 key={n.id_noticia}
                 className={`hero-slide${i === slide ? ' active' : ''}`}
@@ -112,7 +114,7 @@ function Home() {
               </article>
             ))}
 
-            {noticias.length > 1 && (
+            {heroNoticias.length > 1 && (
               <>
                 <button className="hero-arrow prev" onClick={prev} aria-label="Anterior">
                   <ChevronLeft size={28} />
@@ -121,7 +123,7 @@ function Home() {
                   <ChevronRight size={28} />
                 </button>
                 <div className="hero-dots">
-                  {noticias.map((_, i) => (
+                  {heroNoticias.map((_, i) => (
                     <button
                       key={i}
                       className={`hero-dot${i === slide ? ' active' : ''}`}
@@ -186,8 +188,8 @@ function Home() {
 
         <h2 className="section-title reveal">Noticias del Club</h2>
         <section className="home-news-grid">
-          {featuredNoticias.length > 0 ? (
-            featuredNoticias.map((n) => (
+          {clubNoticias.length > 0 ? (
+            clubNoticias.map((n) => (
               <Link to={`/noticias/${n.id_noticia}`} key={n.id_noticia} className="home-news-card-link reveal">
                 <article className="home-news-card">
                   <div className="home-news-img">
