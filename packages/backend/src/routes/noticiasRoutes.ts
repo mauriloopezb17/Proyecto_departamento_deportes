@@ -14,13 +14,13 @@ router.get("/:id", noticiaController.getNoticia);
 /*router.post(
   "/",
   authenticateJWT,
-  authorizeRoles("Administrador"),
+  authorizeRoles("admin"),
   noticiaController.createNoticia,
 );
 router.put(
   "/:id",
   authenticateJWT,
-  authorizeRoles("Administrador"),
+  authorizeRoles("admin"),
   noticiaController.updateNoticia,
 );*/
 router.post("/", noticiaController.createNoticia);
@@ -28,7 +28,7 @@ router.put("/:id", noticiaController.updateNoticia);
 router.delete(
   "/:id",
   authenticateJWT,
-  authorizeRoles("Administrador"),
+  authorizeRoles("admin"),
   noticiaController.deleteNoticia,
 );
 router.get("/usuario/:id_usuario", noticiaController.getNoticiasByUsuario);

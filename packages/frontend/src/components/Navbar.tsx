@@ -1,5 +1,7 @@
-import { NavLink, Link } from 'react-router-dom'
-import { User } from 'lucide-react'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react'
+import { User, Shield, LogOut, ChevronDown } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 import './Navbar.css'
 
 const links = [
@@ -11,6 +13,31 @@ const links = [
 ]
 
 function Navbar() {
+  const { user, isAuthenticated, isAdmin, logout, loading } = useAuth()
+  const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const handleLogout = () => {
+    setMenuOpen(false)
+    logout()
+    navigate('/')
+  }
+
+  const displayName = user
+    ? (`${user.nombres ?? ''} ${user.ape_paterno ?? ''}`.trim() || user.email)
+    : ''
+
   return (
     <nav className="ucb-nav">
       <Link to="/" className="logo-area">
@@ -32,10 +59,66 @@ function Navbar() {
             {l.label}
           </NavLink>
         ))}
-        <Link to="/login" className="btn-login">
-          <User size={16} strokeWidth={2.5} />
-          Inicia Sesión
-        </Link>
+
+        {isAdmin && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) => `nav-admin-link${isActive ? ' active' : ''}`}
+          >
+            <Shield size={15} strokeWidth={2.5} />
+            Panel admin
+          </NavLink>
+        )}
+
+        {!loading && !isAuthenticated && (
+          <Link to="/login" className="btn-login">
+            <User size={16} strokeWidth={2.5} />
+            Inicia Sesión
+          </Link>
+        )}
+
+        {!loading && isAuthenticated && (
+          <div className="nav-user-menu" ref={menuRef}>
+            <button
+              type="button"
+              className={`nav-user-trigger${menuOpen ? ' open' : ''}`}
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              <span className="nav-user-avatar">
+                {(user?.nombres?.[0] ?? user?.email?.[0] ?? 'U').toUpperCase()}
+              </span>
+              <span className="nav-user-name">{displayName}</span>
+              <ChevronDown size={14} strokeWidth={2.5} />
+            </button>
+            {menuOpen && (
+              <div className="nav-user-dropdown">
+                <div className="nav-user-dropdown-header">
+                  <p className="nav-user-dropdown-name">{displayName}</p>
+                  <p className="nav-user-dropdown-email">{user?.email}</p>
+                  <span className="nav-user-dropdown-role">{user?.nombre_rol}</span>
+                </div>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="nav-user-dropdown-item"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <Shield size={14} strokeWidth={2.2} />
+                    Panel de administración
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  className="nav-user-dropdown-item logout"
+                  onClick={handleLogout}
+                >
+                  <LogOut size={14} strokeWidth={2.2} />
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </nav>
   )

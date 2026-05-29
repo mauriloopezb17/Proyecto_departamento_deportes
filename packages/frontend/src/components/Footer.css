@@ -2,7 +2,9 @@
   background-color: var(--ucb-blue);
   color: white;
   padding: 3rem 5%;
-  margin-top: 4rem;
+  margin-top: 2rem;
+  width: 100%;
+  border-top: 4px solid var(--ucb-yellow);
 }
 
 .ucb-footer .footer-inner {

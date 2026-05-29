@@ -1,21 +1,216 @@
-.hero {
-  padding: 5rem 5%;
-  text-align: center;
-  background-color: white;
+/* ── Hero carousel ── */
+.hero-carousel {
+  position: relative;
+  height: 480px;
+  overflow: hidden;
+  background: var(--ucb-blue);
   border-bottom: 4px solid var(--ucb-yellow);
 }
 
-.hero h1 {
-  font-size: 2.5rem;
-  color: var(--ucb-blue);
-  margin-bottom: 1rem;
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
 }
 
-.hero p {
-  color: var(--text-light);
+.hero-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Animate content in when a slide becomes active */
+.hero-slide.active .hero-slide-tag {
+  animation: fadeInUp 0.45s 0.05s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-slide.active h1 {
+  animation: fadeInUp 0.50s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-slide.active p {
+  animation: fadeInUp 0.50s 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-slide.active .btn-primary {
+  animation: fadeInUp 0.45s 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-slide-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Slow, subtle zoom while a slide is on screen */
+.hero-slide.active img.hero-slide-bg {
+  animation: heroKenBurns 8s ease-out both;
+}
+
+@keyframes heroKenBurns {
+  from { transform: scale(1.06); }
+  to   { transform: scale(1);    }
+}
+
+.hero-slide-bg-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--ucb-blue) 0%, var(--ucb-blue-dark) 100%);
+  color: rgba(255, 241, 181, 0.15);
+}
+
+.hero-slide-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(1, 43, 67, 0.92) 0%,
+    rgba(1, 43, 67, 0.75) 45%,
+    rgba(1, 43, 67, 0.4) 100%
+  );
+}
+
+.hero-slide-content {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 5%;
+  color: white;
+}
+
+.hero-slide-tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--ucb-yellow);
+  color: var(--ucb-blue);
+  margin-bottom: 18px;
+}
+
+.hero-slide-content h1 {
+  font-size: 2.5rem;
+  color: white;
+  margin: 0 0 14px;
+  line-height: 1.15;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.hero-slide-content p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.05rem;
+  margin: 0 0 26px;
+  max-width: 580px;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hero-slide-content .btn-primary {
+  align-self: flex-start;
+}
+
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  backdrop-filter: blur(6px);
+}
+
+.hero-arrow:hover {
+  background: var(--ucb-yellow);
+  color: var(--ucb-blue);
+  border-color: var(--ucb-yellow);
+}
+
+.hero-arrow.prev { left: 18px; }
+.hero-arrow.next { right: 18px; }
+
+.hero-dots {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+}
+
+.hero-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, width 0.2s;
+  padding: 0;
+}
+
+.hero-dot.active {
+  background: var(--ucb-yellow);
+  width: 28px;
+  border-radius: 6px;
+}
+
+.hero-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  padding: 2rem 5%;
+  background: linear-gradient(135deg, var(--ucb-blue) 0%, var(--ucb-blue-dark) 100%);
+}
+
+.hero-empty svg {
+  color: rgba(255, 241, 181, 0.4);
+  margin-bottom: 18px;
+}
+
+.hero-empty h1 {
+  color: white;
+  font-size: 2.2rem;
+  margin: 0 0 12px;
+}
+
+.hero-empty p {
+  color: rgba(255, 255, 255, 0.75);
   max-width: 600px;
-  margin: 0 auto 2.5rem auto;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .hero-carousel { height: 420px; }
+  .hero-slide-content h1 { font-size: 1.7rem; }
+  .hero-slide-content p { font-size: 0.95rem; }
+  .hero-arrow { width: 36px; height: 36px; }
 }
 
 /* match center */
@@ -109,17 +304,24 @@
   margin-bottom: 2rem;
 }
 
+.home-news-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 .home-news-card {
   background: white;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: var(--card-shadow);
   width: 320px;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .home-news-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
   box-shadow: var(--hover-shadow);
 }
 
@@ -137,6 +339,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.home-news-card:hover .home-news-cover {
+  transform: scale(1.06);
 }
 
 .home-news-content {

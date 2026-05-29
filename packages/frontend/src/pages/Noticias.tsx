@@ -44,7 +44,7 @@ function Noticias() {
         )}
         <div className="news-grid">
           {noticias.map((n) => (
-            <article key={n.id_noticia} className="news-card">
+            <article key={n.id_noticia} className="news-card reveal">
               <div className="news-img">
                 {n.imagen_portada ? (
                   <img src={n.imagen_portada} alt={n.titulo} className="news-cover" />
