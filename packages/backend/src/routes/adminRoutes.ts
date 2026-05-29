@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { inscribirDeportista, obtenerCatalogosInscripcion, crearUsuario, listarRoles, listarCarreras, listarDeportistas, registrarHorarioEntrenamiento } from '../controllers/adminController';
+import { inscribirDeportista, obtenerCatalogosInscripcion, crearUsuario, listarRoles, listarCarreras, listarDeportistas, registrarHorarioEntrenamiento, cambiarEstadoDeportista } from '../controllers/adminController';
 import { authenticateJWT } from '../middlewares/authMiddleware';
 import { authorizeRoles } from '../middlewares/roleMiddleware';
 
@@ -53,4 +53,12 @@ router.post(
   authorizeRoles('admin'),
   registrarHorarioEntrenamiento
 );
+
+router.patch(
+  '/deportistas/:id/estado',
+  authenticateJWT,
+  authorizeRoles('admin'),
+  cambiarEstadoDeportista
+);
+
 export default router;

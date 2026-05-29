@@ -16,7 +16,7 @@ components:
       bearerFormat: JWT
 
   schemas:
-    # ── Auth 
+    # ── Auth
     LoginBody:
       type: object
       required: [email, password]
@@ -30,7 +30,16 @@ components:
 
     RegisterBody:
       type: object
-      required: [nombres, ape_paterno, fecha_nacimiento, celular, email, password, id_rol]
+      required:
+        [
+          nombres,
+          ape_paterno,
+          fecha_nacimiento,
+          celular,
+          email,
+          password,
+          id_rol,
+        ]
       properties:
         nombres:
           type: string
@@ -79,7 +88,7 @@ components:
           type: string
           minLength: 8
 
-    # ── Noticias 
+    # ── Noticias
     CreateNoticiaBody:
       type: object
       required: [titulo, contenido]
@@ -121,7 +130,7 @@ components:
           items:
             type: string
 
-    # ── Admin 
+    # ── Admin
     InscribirDeportistaBody:
       type: object
       required: [deportista, inscripcion]
@@ -135,7 +144,8 @@ components:
 
     CrearUsuarioBody:
       type: object
-      required: [nombres, ape_paterno, fecha_nacimiento, celular, ci, email, id_rol]
+      required:
+        [nombres, ape_paterno, fecha_nacimiento, celular, ci, email, id_rol]
       properties:
         nombres:
           type: string
@@ -160,6 +170,54 @@ components:
           type: integer
           description: Obligatorio si id_rol = 3 (Delegado)
 
+    # ── Admin (Nuevos)
+    RegistrarHorarioBody:
+      type: object
+      required:
+        [
+          id_espacio,
+          id_disciplina,
+          dia_semana,
+          hora_inicio,
+          hora_fin,
+          id_entrenador,
+        ]
+      properties:
+        id_espacio:
+          type: integer
+        id_disciplina:
+          type: integer
+        dia_semana:
+          type: integer
+          description: "1 (Lunes) a 7 (Domingo)"
+          minimum: 1
+          maximum: 7
+        hora_inicio:
+          type: string
+          format: time
+          example: "14:30:00"
+        hora_fin:
+          type: string
+          format: time
+          example: "16:00:00"
+        id_entrenador:
+          type: integer
+
+    # ── Galeria
+    CrearGaleriaBody:
+      type: object
+      required: [url_archivo, tipo_archivo]
+      properties:
+        url_archivo:
+          type: string
+        tipo_archivo:
+          type: string
+        descripcion:
+          type: string
+        publicado:
+          type: boolean
+          default: false
+
 tags:
   - name: Auth
     description: Autenticación y gestión de acceso
@@ -171,9 +229,15 @@ tags:
     description: Subida de imágenes
   - name: Partidos
     description: Resultados y fixtures de partidos
+  - name: Deportistas
+    description: Información pública de los deportistas
+  - name: Galeria
+    description: Gestión de la galería multimedia
+  - name: Info
+    description: Información pública del club (entrenadores, horarios, espacios)
 
 paths:
-  # ── Auth 
+  # ── Auth
   /api/auth/login:
     post:
       tags: [Auth]
@@ -183,7 +247,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginBody'
+              $ref: "#/components/schemas/LoginBody"
       responses:
         200:
           description: Login exitoso, devuelve token JWT
@@ -199,7 +263,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterBody'
+              $ref: "#/components/schemas/RegisterBody"
       responses:
         201:
           description: Usuario registrado exitosamente
@@ -215,7 +279,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ForgotPasswordBody'
+              $ref: "#/components/schemas/ForgotPasswordBody"
       responses:
         200:
           description: Si el correo existe, se envía el código al correo
@@ -229,7 +293,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VerifyCodeBody'
+              $ref: "#/components/schemas/VerifyCodeBody"
       responses:
         200:
           description: Código válido, devuelve reset_token
@@ -254,14 +318,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResetPasswordBody'
+              $ref: "#/components/schemas/ResetPasswordBody"
       responses:
         200:
           description: Contraseña actualizada correctamente
         400:
           description: Token inválido o expirado
 
-  # ── Noticias 
+  # ── Noticias
   /api/noticias:
     get:
       tags: [Noticias]
@@ -285,7 +349,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateNoticiaBody'
+              $ref: "#/components/schemas/CreateNoticiaBody"
       responses:
         201:
           description: Noticia creada con éxito
@@ -330,7 +394,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateNoticiaBody'
+              $ref: "#/components/schemas/UpdateNoticiaBody"
       responses:
         200:
           description: Noticia actualizada con éxito
@@ -370,7 +434,7 @@ paths:
         400:
           description: ID de usuario inválido
 
-  # ── Admin 
+  # ── Admin
   /api/admin/catalogos/inscripcion:
     get:
       tags: [Admin]
@@ -394,7 +458,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InscribirDeportistaBody'
+              $ref: "#/components/schemas/InscribirDeportistaBody"
       responses:
         201:
           description: Deportista inscrito correctamente
@@ -426,7 +490,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CrearUsuarioBody'
+              $ref: "#/components/schemas/CrearUsuarioBody"
       responses:
         201:
           description: Usuario registrado correctamente
@@ -459,7 +523,7 @@ paths:
         401:
           description: No autorizado
 
-  # ── Upload 
+  # ── Upload
   /api/upload:
     post:
       tags: [Upload]
@@ -518,7 +582,7 @@ paths:
         400:
           description: No se proporcionó ninguna imagen
 
-  # ── Partidos 
+  # ── Partidos
   /api/partidos/recientes:
     get:
       tags: [Partidos]
@@ -543,3 +607,286 @@ paths:
           description: Fixture del torneo
         400:
           description: ID de torneo inválido
+
+  /api/admin/horarios/entrenamiento:
+    post:
+      tags: [Admin]
+      summary: Registrar un nuevo horario de entrenamiento
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrarHorarioBody"
+      responses:
+        201:
+          description: Horario de entrenamiento registrado exitosamente
+        400:
+          description: Faltan campos obligatorios o día inválido
+        401:
+          description: No autorizado
+        500:
+          description: Error interno al guardar el horario
+
+  /api/deportistas/destacados:
+    get:
+      tags: [Deportistas]
+      summary: Obtener lista de jugadores destacados
+      responses:
+        200:
+          description: Lista de jugadores destacados
+
+  /api/galeria:
+    get:
+      tags: [Galeria]
+      summary: Obtener la galería multimedia
+      parameters:
+        - in: query
+          name: publicado
+          schema:
+            type: string
+            enum: ["true", "false"]
+          description: Filtrar solo elementos publicados
+      responses:
+        200:
+          description: Lista de elementos de la galería
+    post:
+      tags: [Galeria]
+      summary: Crear un elemento en la galería
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrearGaleriaBody"
+      responses:
+        201:
+          description: Elemento guardado en galería
+        400:
+          description: Faltan datos obligatorios
+
+  /api/galeria/{id}:
+    put:
+      tags: [Galeria]
+      summary: Actualizar un elemento de la galería
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrearGaleriaBody"
+      responses:
+        200:
+          description: Elemento actualizado
+        404:
+          description: Elemento no encontrado
+    delete:
+      tags: [Galeria]
+      summary: Eliminar un elemento de la galería
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Elemento eliminado correctamente
+        404:
+          description: Elemento no encontrado
+
+  /api/info/entrenadores:
+    get:
+      tags: [Info]
+      summary: Obtener lista de entrenadores
+      responses:
+        200:
+          description: Lista de entrenadores
+
+  /api/info/horarios:
+    get:
+      tags: [Info]
+      summary: Obtener horarios generales
+      responses:
+        200:
+          description: Lista de horarios
+
+  /api/info/galeria-eventos:
+    get:
+      tags: [Info]
+      summary: Obtener galería de eventos del club
+      responses:
+        200:
+          description: Galería de eventos
+
+  /api/info/espacios:
+    get:
+      tags: [Info]
+      summary: Obtener espacios deportivos disponibles
+      responses:
+        200:
+          description: Lista de espacios
+
+  /api/partidos/torneos:
+    get:
+      tags: [Partidos]
+      summary: Listar todos los torneos
+      responses:
+        200:
+          description: Lista de torneos
+
+  /api/partidos/disciplinas:
+    get:
+      tags: [Partidos]
+      summary: Listar todas las disciplinas deportivas
+      responses:
+        200:
+          description: Lista de disciplinas
+
+  /api/partidos/resultados:
+    get:
+      tags: [Partidos]
+      summary: Obtener todos los resultados generales
+      responses:
+        200:
+          description: Resultados generales
+
+  /api/partidos/proximos:
+    get:
+      tags: [Partidos]
+      summary: Obtener próximos partidos generales
+      responses:
+        200:
+          description: Lista de próximos partidos
+
+  /api/partidos/posiciones/{idTorneo}:
+    get:
+      tags: [Partidos]
+      summary: Obtener la tabla de posiciones de un torneo
+      parameters:
+        - in: path
+          name: idTorneo
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: disciplina
+          schema:
+            type: integer
+          description: Filtrar por ID de disciplina (opcional)
+      responses:
+        200:
+          description: Tabla de posiciones
+        400:
+          description: ID de torneo inválido
+
+  /api/partidos/torneo/{idTorneo}:
+    get:
+      tags: [Partidos]
+      summary: Obtener todos los partidos de un torneo específico
+      parameters:
+        - in: path
+          name: idTorneo
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: disciplina
+          schema:
+            type: integer
+          description: Filtrar por ID de disciplina (opcional)
+      responses:
+        200:
+          description: Lista de partidos del torneo
+        400:
+          description: ID de torneo inválido
+
+  /api/partidos/goleadores/{idTorneo}:
+    get:
+      tags: [Partidos]
+      summary: Obtener tabla de goleadores de un torneo
+      parameters:
+        - in: path
+          name: idTorneo
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: disciplina
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Tabla de goleadores
+        400:
+          description: ID de torneo inválido
+
+  /api/partidos/tarjetas/{idTorneo}:
+    get:
+      tags: [Partidos]
+      summary: Obtener tabla de tarjetas de un torneo
+      parameters:
+        - in: path
+          name: idTorneo
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: disciplina
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Tabla de tarjetas
+        400:
+          description: ID de torneo inválido
+
+  /api/admin/deportistas/{id}/estado:
+    patch:
+      tags: [Admin]
+      summary: Cambiar o alternar el estado de un deportista
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del deportista al que se le cambiará el estado
+      responses:
+        200:
+          description: Estado actualizado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Estado actualizado correctamente
+                  nuevo_estado:
+                    type: string
+                    example: "Inactivo"
+        400:
+          description: ID de deportista inválido
+        401:
+          description: No autorizado (Token faltante, inválido o el usuario no es Administrador)
+        404:
+          description: No se encontraron inscripciones para este deportista
+        500:
+          description: Error interno del servidor al actualizar el estado
