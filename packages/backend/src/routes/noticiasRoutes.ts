@@ -11,7 +11,7 @@ router.get("/categorias", noticiaController.getCategorias);
 router.get("/:id", noticiaController.getNoticia);
 
 // pal admin
-/*router.post(
+router.post(
   "/",
   authenticateJWT,
   authorizeRoles("admin"),
@@ -22,9 +22,9 @@ router.put(
   authenticateJWT,
   authorizeRoles("admin"),
   noticiaController.updateNoticia,
-);*/
-router.post("/", noticiaController.createNoticia);
-router.put("/:id", noticiaController.updateNoticia);
+);
+/*router.post("/", noticiaController.createNoticia);
+router.put("/:id", noticiaController.updateNoticia);*/
 router.delete(
   "/:id",
   authenticateJWT,
