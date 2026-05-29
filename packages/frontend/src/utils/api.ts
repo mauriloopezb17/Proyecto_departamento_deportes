@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3001'
+export const API_BASE = 'http://localhost:3001'
 
 export function getToken(): string | null {
   return localStorage.getItem('ucb_token')

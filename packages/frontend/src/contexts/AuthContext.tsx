@@ -20,6 +20,7 @@ interface AuthContextType {
   user: JWTPayload | null
   isAdmin: boolean
   isAuthenticated: boolean
+  loading: boolean
   logout: () => void
   refreshAuth: () => void
 }
@@ -37,12 +38,14 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isAdmin: false,
   isAuthenticated: false,
+  loading: true,
   logout: () => {},
   refreshAuth: () => {},
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<JWTPayload | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const refreshAuth = () => {
     const token = getToken()
@@ -51,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refreshAuth()
+    setLoading(false)
   }, [])
 
   const logout = () => {
@@ -62,8 +66,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        isAdmin: user?.nombre_rol === 'Administrador',
+        isAdmin: user?.id_rol === 1,
         isAuthenticated: user !== null,
+        loading,
         logout,
         refreshAuth,
       }}

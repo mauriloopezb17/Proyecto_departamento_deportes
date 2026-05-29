@@ -41,6 +41,7 @@
   padding: 40px 36px;
   box-shadow: var(--card-shadow);
   border-top: 4px solid var(--ucb-yellow);
+  animation: scaleIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .login-header {

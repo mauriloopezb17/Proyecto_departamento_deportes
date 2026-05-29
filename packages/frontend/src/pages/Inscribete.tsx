@@ -1,10 +1,10 @@
 import {
   Award,
   ClipboardList,
-  Edit3,
+  Users,
   CheckCircle2,
   FileText,
-  Play,
+  MessageCircle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
@@ -20,20 +20,19 @@ const steps: Step[] = [
   },
   {
     Icon: ClipboardList,
-    title: 'Prepara tus Datos',
-    body: 'Ten a mano tu matrícula vigente y tu información médica básica para agilizar el proceso de registro.',
+    title: 'Prepara tus Documentos',
+    body: 'Ten lista la documentación requerida antes de acercarte al Departamento de Deportes.',
   },
   {
-    Icon: Edit3,
-    title: 'Llena el Formulario',
-    body: 'Completa la solicitud digital. Nuestro equipo validará tu información y te contactará en 48 horas.',
+    Icon: Users,
+    title: 'Habla con el Personal',
+    body: 'Acercate al Departamento de Deportes UCB con tus documentos y te ayudamos a completar la inscripción.',
   },
 ]
 
 const requirements = [
   'Ser estudiante regular inscrito en el semestre actual.',
   'Fotocopia simple de Cédula de Identidad.',
-  'Certificado médico de aptitud física (vigencia máx. 3 meses).',
   'Seguro contra accidentes vigente (Universitario o Privado).',
 ]
 
@@ -48,7 +47,7 @@ function Inscribete() {
       <div className="container inscribete-container">
         <div className="steps-grid">
           {steps.map(({ Icon, title, body }, i) => (
-            <div key={i} className="step-card">
+            <div key={i} className="step-card reveal">
               <div className="step-icon">
                 <Icon size={28} />
               </div>
@@ -58,7 +57,7 @@ function Inscribete() {
           ))}
         </div>
 
-        <div className="requirements-box">
+        <div className="requirements-box reveal">
           <div className="req-text">
             <h2>Requisitos Obligatorios</h2>
             <p>
@@ -80,14 +79,19 @@ function Inscribete() {
         </div>
 
         <div className="cta-section">
-          <h2>¿Listo para entrar a la cancha?</h2>
+          <div className="cta-icon">
+            <MessageCircle size={40} />
+          </div>
+          <h2>¿Listo para inscribirte?</h2>
           <p>
-            El periodo de inscripciones para el Torneo Intercarreras 2026
-            cierra este viernes. No dejes a tu equipo con un jugador menos.
+            Cuando tengas todos tus requisitos listos, acercate al
+            <strong> Departamento de Deportes UCB</strong>. Nuestro personal te
+            ayudará a completar tu inscripción de forma presencial.
           </p>
-          <a href="#" className="btn-mega">
-            Comenzar Inscripción <Play size={18} />
-          </a>
+          <p className="cta-note">
+            La inscripción es realizada por el personal del departamento, no
+            hay formulario en línea.
+          </p>
         </div>
       </div>
     </>
