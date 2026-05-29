@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { generateToken } from '../utils/jwt';
 import pool from '../config/db';
 import bcrypt from 'bcrypt';
+import { crearCodigoReset, validarCodigo, cambiarPassword } from '../services/passwordResetService';
+import { sendPasswordResetCode } from '../utils/email';
 
 export const googleCallback = (req: Request, res: Response) => {
   try {
@@ -107,5 +109,59 @@ export const register = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Error interno al registrar usuario' });
   } finally {
     client.release();
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'El correo es obligatorio' });
+
+  try {
+    const codigo = await crearCodigoReset(email);
+    if (codigo !== 'ok') {
+      await sendPasswordResetCode(email, codigo);
+    }
+    // Siempre respondemos igual para no revelar si el email existe
+    res.json({ message: 'Si el correo está registrado, recibirás un código en tu bandeja.' });
+  } catch (error) {
+    console.error('Error en forgot-password:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+export const verifyResetCode = async (req: Request, res: Response) => {
+  const { email, codigo } = req.body;
+  if (!email || !codigo) return res.status(400).json({ error: 'Correo y código son obligatorios' });
+
+  try {
+    const resetToken = await validarCodigo(email, codigo);
+    if (!resetToken) {
+      return res.status(400).json({ valid: false, error: 'Código inválido o expirado' });
+    }
+    res.json({ valid: true, reset_token: resetToken });
+  } catch (error) {
+    console.error('Error en verify-reset-code:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const { reset_token, nueva_password } = req.body;
+  if (!reset_token || !nueva_password) {
+    return res.status(400).json({ error: 'Token y nueva contraseña son obligatorios' });
+  }
+  if (nueva_password.length < 8) {
+    return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+  }
+
+  try {
+    const ok = await cambiarPassword(reset_token, nueva_password);
+    if (!ok) {
+      return res.status(400).json({ error: 'Token inválido, expirado o usuario no encontrado' });
+    }
+    res.json({ message: 'Contraseña actualizada correctamente' });
+  } catch (error) {
+    console.error('Error en reset-password:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
