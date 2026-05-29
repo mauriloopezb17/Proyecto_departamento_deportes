@@ -1,64 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  UserPlus,
   ArrowRight,
-  Trophy,
-  Calendar,
-  Medal,
   User,
   Newspaper,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { apiFetch } from '../utils/api'
 import './Home.css'
 
-const lastResults = [
-  { home: 'Sistemas', score: '3 - 1', away: 'Derecho' },
-  { home: 'Arquitectura', score: '2 - 2', away: 'Medicina' },
-  { home: 'Administración', score: '0 - 1', away: 'Ing. Civil' },
-]
-
-const upcomingMatches = [
-  {
-    meta: 'Mañana • Coliseo Principal • Fútsal',
-    home: 'Sistemas',
-    time: '18:30',
-    away: 'Mecatrónica',
-  },
-  {
-    meta: 'Viernes • Cancha Arq. • Básquetbol',
-    home: 'Diseño',
-    time: '19:45',
-    away: 'Comunicación',
-  },
-]
-
-const staticNews = [
-  {
-    Icon: Trophy,
-    tag: 'Intercarreras',
-    title: 'Sistemas clasifica a la final',
-    body: 'El equipo de Ingeniería de Sistemas aseguró su pase a la final tras un agónico partido que se definió en penales.',
-  },
-  {
-    Icon: Calendar,
-    tag: 'Avisos',
-    title: 'Nuevos horarios de Voleibol',
-    body: 'Atención a todas las categorías, los entrenamientos se trasladan al coliseo principal.',
-  },
-  {
-    Icon: Medal,
-    tag: 'Logros',
-    title: 'Medalla de oro en Nacionales',
-    body: 'Nuestros representantes de Taekwondo traen el oro a casa en la última competencia.',
-  },
-]
-
-const players = [
-  { name: 'Alejandro Mendoza', sport: 'Fútsal - Sistemas', stat: 'Goleador del Torneo' },
-  { name: 'Camila Vargas', sport: 'Básquetbol - Derecho', stat: 'MVP Semestral' },
-  { name: 'Diego Rojas', sport: 'Ajedrez - Civil', stat: 'Campeón Nacional' },
-]
+const lastResults: any[] = []
+const upcomingMatches: any[] = []
+const players: any[] = []
 
 interface Noticia {
   id_noticia: number
@@ -70,52 +24,119 @@ interface Noticia {
 
 function Home() {
   const [noticias, setNoticias] = useState<Noticia[]>([])
+  const [slide, setSlide] = useState(0)
 
   useEffect(() => {
     apiFetch<Noticia[]>('/api/noticias?publicado=true')
-      .then((data) => setNoticias(data.slice(0, 3)))
+      .then((data) => setNoticias(data.slice(0, 5)))
       .catch(() => {})
   }, [])
 
-  const newsItems = noticias.length > 0 ? noticias : null
+  // auto-advance every 6s
+  useEffect(() => {
+    if (noticias.length <= 1) return
+    const id = setInterval(() => {
+      setSlide((s) => (s + 1) % noticias.length)
+    }, 6000)
+    return () => clearInterval(id)
+  }, [noticias.length])
+
+  const goTo  = (i: number) => setSlide(((i % noticias.length) + noticias.length) % noticias.length)
+  const prev  = () => goTo(slide - 1)
+  const next  = () => goTo(slide + 1)
+
+  const featuredNoticias = noticias.slice(0, 3)
 
   return (
     <>
-      <header className="hero">
-        <h1>El deporte universitario al siguiente nivel.</h1>
-        <p>
-          Únete a las disciplinas, revisa los fixtures en tiempo real y apoya a
-          tu carrera en el torneo oficial de la UCB.
-        </p>
-        <Link to="/inscribete" className="btn-primary">
-          <UserPlus size={18} />
-          Inscríbete Ahora
-        </Link>
+      <header className="hero-carousel">
+        {noticias.length > 0 ? (
+          <>
+            {noticias.map((n, i) => (
+              <article
+                key={n.id_noticia}
+                className={`hero-slide${i === slide ? ' active' : ''}`}
+              >
+                {n.imagen_portada ? (
+                  <img src={n.imagen_portada} alt={n.titulo} className="hero-slide-bg" />
+                ) : (
+                  <div className="hero-slide-bg hero-slide-bg-placeholder">
+                    <Newspaper size={120} />
+                  </div>
+                )}
+                <div className="hero-slide-overlay" />
+                <div className="hero-slide-content">
+                  <span className="hero-slide-tag">{n.categoria_nombre}</span>
+                  <h1>{n.titulo}</h1>
+                  {n.resumen && <p>{n.resumen}</p>}
+                  <Link to={`/noticias/${n.id_noticia}`} className="btn-primary">
+                    Leer noticia <ArrowRight size={18} />
+                  </Link>
+                </div>
+              </article>
+            ))}
+
+            {noticias.length > 1 && (
+              <>
+                <button className="hero-arrow prev" onClick={prev} aria-label="Anterior">
+                  <ChevronLeft size={28} />
+                </button>
+                <button className="hero-arrow next" onClick={next} aria-label="Siguiente">
+                  <ChevronRight size={28} />
+                </button>
+                <div className="hero-dots">
+                  {noticias.map((_, i) => (
+                    <button
+                      key={i}
+                      className={`hero-dot${i === slide ? ' active' : ''}`}
+                      onClick={() => goTo(i)}
+                      aria-label={`Ir a la noticia ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <div className="hero-empty">
+            <Newspaper size={72} />
+            <h1>El deporte universitario al siguiente nivel.</h1>
+            <p>Únete a las disciplinas, revisa los fixtures y apoya a tu carrera en el torneo oficial de la UCB.</p>
+          </div>
+        )}
       </header>
 
       <div className="container">
-        <h2 className="section-title">Centro de Partidos</h2>
+        <h2 className="section-title reveal">Centro de Partidos</h2>
         <div className="match-center">
           <div className="match-panel">
             <h3>Últimos Resultados</h3>
-            {lastResults.map((m, i) => (
-              <div key={i} className="match-card">
-                <div className="team-info">{m.home}</div>
-                <div className="score-box">{m.score}</div>
-                <div className="team-info away">{m.away}</div>
-              </div>
-            ))}
+            {lastResults.length > 0 ? (
+              lastResults.map((m, i) => (
+                <div key={i} className="match-card">
+                  <div className="team-info">{m.home}</div>
+                  <div className="score-box">{m.score}</div>
+                  <div className="team-info away">{m.away}</div>
+                </div>
+              ))
+            ) : (
+              <p className="empty-state" style={{ textAlign: 'center', padding: '1rem', color: '#64748b' }}>Vacío</p>
+            )}
           </div>
           <div className="match-panel">
             <h3>Próximos Partidos (Intercarreras)</h3>
-            {upcomingMatches.map((m, i) => (
-              <div key={i} className="match-card wrap">
-                <span className="match-meta">{m.meta}</span>
-                <div className="team-info">{m.home}</div>
-                <div className="time-box">{m.time}</div>
-                <div className="team-info away">{m.away}</div>
-              </div>
-            ))}
+            {upcomingMatches.length > 0 ? (
+              upcomingMatches.map((m, i) => (
+                <div key={i} className="match-card wrap">
+                  <span className="match-meta">{m.meta}</span>
+                  <div className="team-info">{m.home}</div>
+                  <div className="time-box">{m.time}</div>
+                  <div className="team-info away">{m.away}</div>
+                </div>
+              ))
+            ) : (
+              <p className="empty-state" style={{ textAlign: 'center', padding: '1rem', color: '#64748b' }}>Vacío</p>
+            )}
           </div>
         </div>
         <div className="section-footer">
@@ -124,11 +145,12 @@ function Home() {
           </Link>
         </div>
 
-        <h2 className="section-title">Noticias del Club</h2>
+        <h2 className="section-title reveal">Noticias del Club</h2>
         <section className="home-news-grid">
-          {newsItems
-            ? newsItems.map((n) => (
-                <article key={n.id_noticia} className="home-news-card">
+          {featuredNoticias.length > 0 ? (
+            featuredNoticias.map((n) => (
+              <Link to={`/noticias/${n.id_noticia}`} key={n.id_noticia} className="home-news-card-link reveal">
+                <article className="home-news-card">
                   <div className="home-news-img">
                     {n.imagen_portada ? (
                       <img src={n.imagen_portada} alt={n.titulo} className="home-news-cover" />
@@ -142,19 +164,11 @@ function Home() {
                     <p>{n.resumen ?? ''}</p>
                   </div>
                 </article>
-              ))
-            : staticNews.map(({ Icon, tag, title, body }, i) => (
-                <article key={i} className="home-news-card">
-                  <div className="home-news-img">
-                    <Icon size={64} />
-                  </div>
-                  <div className="home-news-content">
-                    <span className="home-news-tag">{tag}</span>
-                    <h3>{title}</h3>
-                    <p>{body}</p>
-                  </div>
-                </article>
-              ))}
+              </Link>
+            ))
+          ) : (
+            <p className="empty-state" style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '2rem', color: '#64748b' }}>No hay noticias disponibles</p>
+          )}
         </section>
         <div className="section-footer">
           <Link to="/noticias" className="btn-more">
@@ -162,20 +176,24 @@ function Home() {
           </Link>
         </div>
 
-        <h2 className="section-title">Jugadores Destacados</h2>
+        <h2 className="section-title reveal">Jugadores Destacados</h2>
         <section className="home-players-grid">
-          {players.map((p, i) => (
-            <article key={i} className="home-player-card">
-              <div className="home-player-photo">
-                <User size={80} />
-              </div>
-              <div className="home-player-info">
-                <h4>{p.name}</h4>
-                <span className="home-player-sport">{p.sport}</span>
-                <span className="home-player-stat">{p.stat}</span>
-              </div>
-            </article>
-          ))}
+          {players.length > 0 ? (
+            players.map((p, i) => (
+              <article key={i} className="home-player-card">
+                <div className="home-player-photo">
+                  <User size={80} />
+                </div>
+                <div className="home-player-info">
+                  <h4>{p.name}</h4>
+                  <span className="home-player-sport">{p.sport}</span>
+                  <span className="home-player-stat">{p.stat}</span>
+                </div>
+              </article>
+            ))
+          ) : (
+            <p className="empty-state" style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '2rem', color: '#64748b' }}>Vacío</p>
+          )}
         </section>
         <div className="section-footer">
           <Link to="/club" className="btn-more">

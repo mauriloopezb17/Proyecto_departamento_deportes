@@ -6,64 +6,7 @@ import './Torneos.css'
 type CalEvent = { type: 'futsal' | 'basket' | 'voley'; label: string; title: string }
 type CalCell = { date?: number; events?: CalEvent[]; today?: boolean; empty?: boolean }
 
-const calendar: CalCell[] = [
-  { empty: true },
-  { empty: true },
-  { date: 1 },
-  { date: 2 },
-  { date: 3 },
-  {
-    date: 4,
-    events: [{ type: 'basket', label: 'ARQ vs DER', title: 'Básquetbol: ARQ vs DER (15:00)' }],
-  },
-  { date: 5 },
-  { date: 6 },
-  { date: 7 },
-  { date: 8 },
-  { date: 9 },
-  { date: 10 },
-  {
-    date: 11,
-    events: [
-      { type: 'futsal', label: 'MED vs MEC', title: 'Fútsal: MED vs MEC (18:00)' },
-      { type: 'voley', label: 'SIS vs CIV', title: 'Voleibol: SIS vs CIV (20:00)' },
-    ],
-  },
-  { date: 12 },
-  { date: 13 },
-  { date: 14 },
-  { date: 15 },
-  { date: 16 },
-  { date: 17 },
-  {
-    date: 18,
-    events: [
-      { type: 'futsal', label: 'SIS vs DER', title: 'Fútsal: SIS vs DER (18:30)' },
-      { type: 'futsal', label: 'MED vs MEC', title: 'Fútsal: MED vs MEC (20:00)' },
-    ],
-  },
-  { date: 19 },
-  { date: 20 },
-  { date: 21 },
-  { date: 22 },
-  { date: 23 },
-  { date: 24, today: true },
-  {
-    date: 25,
-    events: [
-      { type: 'basket', label: 'ARQ vs MED', title: 'Básquetbol: ARQ vs MED (18:30)' },
-      { type: 'futsal', label: 'CIV vs SIS', title: 'Fútsal: CIV vs SIS (20:00)' },
-    ],
-  },
-  { date: 26 },
-  { date: 27 },
-  { date: 28 },
-  { date: 29 },
-  { date: 30 },
-  { empty: true },
-  { empty: true },
-  { empty: true },
-]
+const calendar: CalCell[] = []
 
 const dayHeaders = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
@@ -81,28 +24,32 @@ function CalendarTab() {
             {d}
           </div>
         ))}
-        {calendar.map((c, i) => {
-          if (c.empty) return <div key={i} className="cal-cell empty" />
-          return (
-            <div key={i} className={`cal-cell${c.today ? ' today' : ''}`}>
-              <span className="cal-date">{c.date}</span>
-              {c.events?.map((ev, j) => (
-                <div
-                  key={j}
-                  className={`cal-event ${ev.type}`}
-                  title={ev.title}
-                >
-                  {ev.type === 'voley' ? (
-                    <Activity size={12} />
-                  ) : (
-                    <Circle size={12} />
-                  )}{' '}
-                  {ev.label}
-                </div>
-              ))}
-            </div>
-          )
-        })}
+        {calendar.length > 0 ? (
+          calendar.map((c, i) => {
+            if (c.empty) return <div key={i} className="cal-cell empty" />
+            return (
+              <div key={i} className={`cal-cell${c.today ? ' today' : ''}`}>
+                <span className="cal-date">{c.date}</span>
+                {c.events?.map((ev, j) => (
+                  <div
+                    key={j}
+                    className={`cal-event ${ev.type}`}
+                    title={ev.title}
+                  >
+                    {ev.type === 'voley' ? (
+                      <Activity size={12} />
+                    ) : (
+                      <Circle size={12} />
+                    )}{' '}
+                    {ev.label}
+                  </div>
+                ))}
+              </div>
+            )
+          })
+        ) : (
+          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#64748b' }}>Vacío</div>
+        )}
       </div>
     </div>
   )
@@ -123,11 +70,7 @@ type StandingRow = {
   leader?: boolean
 }
 
-const standings: StandingRow[] = [
-  { pos: 1, team: 'Ing. de Sistemas', short: 'SIS', pj: 5, pg: 4, pe: 1, pp: 0, gf: 15, gc: 4, dg: '+11', pts: 13, leader: true },
-  { pos: 2, team: 'Medicina', short: 'MED', pj: 5, pg: 4, pe: 0, pp: 1, gf: 12, gc: 5, dg: '+7', pts: 12, leader: true },
-  { pos: 3, team: 'Arquitectura', short: 'ARQ', pj: 5, pg: 2, pe: 2, pp: 1, gf: 8, gc: 7, dg: '+1', pts: 8 },
-]
+const standings: StandingRow[] = []
 
 function StandingsTab() {
   return (
@@ -148,25 +91,31 @@ function StandingsTab() {
           </tr>
         </thead>
         <tbody>
-          {standings.map((r) => (
-            <tr key={r.pos} className={r.leader ? 'leader' : ''}>
-              <td className="num">{r.pos}</td>
-              <td>
-                <div className="team-cell">
-                  <div className="team-logo">{r.short}</div>
-                  {r.team}
-                </div>
-              </td>
-              <td className="num">{r.pj}</td>
-              <td className="num">{r.pg}</td>
-              <td className="num">{r.pe}</td>
-              <td className="num">{r.pp}</td>
-              <td className="num">{r.gf}</td>
-              <td className="num">{r.gc}</td>
-              <td className="num">{r.dg}</td>
-              <td className="num pts">{r.pts}</td>
+          {standings.length > 0 ? (
+            standings.map((r) => (
+              <tr key={r.pos} className={r.leader ? 'leader' : ''}>
+                <td className="num">{r.pos}</td>
+                <td>
+                  <div className="team-cell">
+                    <div className="team-logo">{r.short}</div>
+                    {r.team}
+                  </div>
+                </td>
+                <td className="num">{r.pj}</td>
+                <td className="num">{r.pg}</td>
+                <td className="num">{r.pe}</td>
+                <td className="num">{r.pp}</td>
+                <td className="num">{r.gf}</td>
+                <td className="num">{r.gc}</td>
+                <td className="num">{r.dg}</td>
+                <td className="num pts">{r.pts}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={10} style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Vacío</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
@@ -174,47 +123,25 @@ function StandingsTab() {
 }
 
 function MatchesTab() {
+  const matches: any[] = [] // Empty for now
+
   return (
     <>
-      <div className="jornada-group">
-        <h3 className="jornada-title">Jornada 5 (Resultados)</h3>
-        <div className="match-row played">
-          <div className="match-date">
-            Sáb, 18 Abr<br />
-            <strong>Finalizado</strong>
-          </div>
-          <div className="match-teams">
-            <span className="team-home">Ing. de Sistemas</span>
-            <div className="score-badge">3 - 1</div>
-            <span className="team-away">Derecho</span>
-          </div>
-          <div className="match-location">
-            <span>Coliseo Principal</span>
-          </div>
+      {matches.length > 0 ? (
+        <div className="jornada-group">
+          <h3 className="jornada-title">Resultados</h3>
+          {/* Matches loop here */}
         </div>
-      </div>
-      <div className="jornada-group">
-        <h3 className="jornada-title">Jornada 6 (Próximos)</h3>
-        <div className="match-row upcoming">
-          <div className="match-date">
-            Sáb, 25 Abr<br />
-            <strong>Por jugar</strong>
-          </div>
-          <div className="match-teams">
-            <span className="team-home">Arquitectura</span>
-            <div className="time-badge">18:30</div>
-            <span className="team-away">Medicina</span>
-          </div>
-          <div className="match-location">
-            <span>Coliseo Principal</span>
-          </div>
-        </div>
-      </div>
+      ) : (
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Vacío</div>
+      )}
     </>
   )
 }
 
 function StatsTab() {
+  const stats: any[] = [] // Empty for now
+  
   return (
     <div className="stats-section-grid">
       <div>
@@ -230,12 +157,11 @@ function StatsTab() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="num">1</td>
-                <td>Alejandro M.</td>
-                <td>Sistemas</td>
-                <td className="num pts">8</td>
-              </tr>
+              {stats.length > 0 ? (
+                <tr>{/* stats loop */}</tr>
+              ) : (
+                <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Vacío</td></tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -252,11 +178,11 @@ function StatsTab() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Derecho</td>
-                <td className="num">12</td>
-                <td className="num">2</td>
-              </tr>
+              {stats.length > 0 ? (
+                <tr>{/* discipline loop */}</tr>
+              ) : (
+                <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Vacío</td></tr>
+              )}
             </tbody>
           </table>
         </div>

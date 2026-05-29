@@ -1,4 +1,6 @@
-const BASE = "/api/noticias";
+import { API_BASE } from "../utils/api";
+
+const BASE = `${API_BASE}/api/noticias`;
 
 export interface Categoria {
   id_categoria_noticia: number;
@@ -54,7 +56,7 @@ export async function uploadImagen(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("imagen", file);
 
-  const res = await fetch(`/api/upload/temp`, {
+  const res = await fetch(`${API_BASE}/api/upload/temp`, {
     method: "POST",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
@@ -73,7 +75,7 @@ export async function uploadImagenPortada(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("imagen", file);
 
-  const res = await fetch(`/api/upload`, {
+  const res = await fetch(`${API_BASE}/api/upload`, {
     method: "POST",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
@@ -153,4 +155,34 @@ export async function publishNoticia(id: number, dto: PublishDTO): Promise<void>
     }),
   });
   await handleRes<unknown>(res);
+}
+
+/** GET /api/noticias — obtiene todas las noticias */
+export async function getNoticias(publicado?: boolean): Promise<any[]> {
+  const url = publicado !== undefined ? `${BASE}?publicado=${publicado}` : BASE;
+  const res = await fetch(url);
+  return handleRes<any[]>(res);
+}
+
+/** GET /api/noticias/:id — obtiene una noticia específica */
+export async function getNoticia(id: number): Promise<any> {
+  const res = await fetch(`${BASE}/${id}`);
+  return handleRes<any>(res);
+}
+
+/** DELETE /api/noticias/:id — elimina una noticia */
+export async function deleteNoticia(id: number): Promise<void> {
+  const res = await fetch(`${BASE}/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  await handleRes<unknown>(res);
+}
+
+/** GET /api/noticias/usuario/:id_usuario — obtiene noticias de un usuario */
+export async function getNoticiasByUsuario(id_usuario: number): Promise<any[]> {
+  const res = await fetch(`${BASE}/usuario/${id_usuario}`, {
+    headers: authHeaders(),
+  });
+  return handleRes<any[]>(res);
 }

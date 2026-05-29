@@ -8,22 +8,19 @@ import { sendPasswordResetCode } from '../utils/email';
 export const googleCallback = (req: Request, res: Response) => {
   try {
     const user = req.user;
-    
+    const frontendURL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
+
     if (!user) {
-      return res.status(401).json({ error: 'Autenticación fallida' });
+      return res.redirect(`${frontendURL}/login?error=no_registrado`);
     }
 
     const token = generateToken(user);
-
-    res.json({
-      message: 'Autenticación exitosa',
-      token: token,
-      user: user
-    });
+    return res.redirect(`${frontendURL}/auth/callback?token=${token}`);
 
   } catch (error) {
     console.error('Error en callback:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    const frontendURL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
+    return res.redirect(`${frontendURL}/login?error=server_error`);
   }
 };
 
