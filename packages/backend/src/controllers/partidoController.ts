@@ -129,3 +129,13 @@ export const obtenerTarjetas = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+
+export const listarDisciplinas = async (req: Request, res: Response) => {
+  try {
+    const disciplinas = await partidoService.getDisciplinas();
+    res.json(disciplinas);
+  } catch (error) {
+    console.error('Error al listar disciplinas:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};

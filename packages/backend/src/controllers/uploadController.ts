@@ -11,34 +11,44 @@ import { s3Client, BUCKET_NAME, CDN_PUBLIC_URL, OCI_NAMESPACE } from "../config/
 export const uploadImage = async (req: Request, res: Response): Promise<void> => {
     try {
         if (!req.file) {
-            res.status(400).json({ message: "No se proporcionó ninguna imagen." });
+            res.status(400).json({ message: "No se proporcionó ningún archivo." });
             return;
         }
 
-        const optimizedBuffer = await sharp(req.file.buffer)
-            .resize({ width: 1000, withoutEnlargement: true })
-            .webp({ quality: 80 })
-            .toBuffer();
+        let fileBuffer = req.file.buffer;
+        let contentType = req.file.mimetype;
+        let extension = "bin";
 
-        const uniqueFilename = `cms-${Date.now()}.webp`;
+        if (contentType.startsWith("image/")) {
+            fileBuffer = await sharp(req.file.buffer)
+                .resize({ width: 1000, withoutEnlargement: true })
+                .webp({ quality: 80 })
+                .toBuffer();
+            contentType = "image/webp";
+            extension = "webp";
+        } 
+        else if (contentType.startsWith("video/")) {
+            extension = contentType === "video/webm" ? "webm" : "mp4";
+        }
+
+        const uniqueFilename = `media-${Date.now()}.${extension}`;
 
         const uploadCommand = new PutObjectCommand({
             Bucket: BUCKET_NAME,
             Key: uniqueFilename,
-            Body: optimizedBuffer,
-            ContentType: "image/webp",
+            Body: fileBuffer,
+            ContentType: contentType,
         });
 
         await s3Client.send(uploadCommand);
         const finalPublicUrl = `${CDN_PUBLIC_URL}/n/${OCI_NAMESPACE}/b/${BUCKET_NAME}/o/${uniqueFilename}`;
 
         res.status(200).json({
-            url: finalPublicUrl
+            url: finalPublicUrl,
         });
-
     } catch (error) {
-        console.error("Error al procesar la imagen:", error);
-        res.status(500).json({ message: "Error interno al subir la imagen." });
+        console.error("Error al procesar el archivo:", error);
+        res.status(500).json({ message: "Error interno al subir el archivo." });
     }
 };
 

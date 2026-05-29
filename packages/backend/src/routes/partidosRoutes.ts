@@ -7,13 +7,15 @@ import { obtenerResultadosRecientes,
     obtenerTablaPosiciones, 
     obtenerPartidosTorneo, 
     obtenerGoleadores, 
-    obtenerTarjetas } from '../controllers/partidoController';
+    obtenerTarjetas,
+    listarDisciplinas } from '../controllers/partidoController';
 
 const router = Router();
 // Los ultimos 10 partidos
 router.get('/recientes', obtenerResultadosRecientes);
 router.get('/fixture/:idTorneo', obtenerFixtureTorneo);
 router.get('/torneos', listarTorneos);
+router.get('/disciplinas', listarDisciplinas);
 // Todos los resultados de los partidos
 router.get('/resultados', obtenerResultados);
 router.get('/proximos', obtenerProximosPartidos);

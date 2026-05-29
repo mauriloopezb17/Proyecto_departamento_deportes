@@ -1,15 +1,15 @@
 import multer from "multer";
 
-const storage = multer.memoryStorage();
-
 export const uploadMiddleware = multer({
   storage: multer.memoryStorage(), 
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (["image/jpeg", "image/png"].includes(file.mimetype)) {
+    const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp", "video/mp4", "video/webm"];
+    
+    if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Solo se permiten imágenes JPG o PNG"));
+      cb(new Error("Formato no soportado. Solo se permiten imágenes (JPG, PNG, WEBP) o videos (MP4, WEBM)"));
     }
   },
 });

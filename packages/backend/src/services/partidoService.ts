@@ -73,7 +73,7 @@ export const getTorneos = async () => {
   const query = `
     SELECT id_torneo, nombre, id_disciplina 
     FROM TORNEOS 
-    WHERE estado IN ('Planificado', 'En curso') 
+    WHERE estado IN ('Planificado', 'En Curso', 'Finalizado') 
     ORDER BY nombre ASC;
   `;
   const result = await pool.query(query);
@@ -224,5 +224,16 @@ export const getTarjetas = async (idTorneo: number, idDisciplina?: number) => {
   `;
   
   const result = await pool.query(query, params);
+  return result.rows;
+};
+
+export const getDisciplinas = async () => {
+  const query = `
+    SELECT id_disciplina, nombre_disciplina 
+    FROM DISCIPLINAS 
+    WHERE activo = TRUE 
+    ORDER BY nombre_disciplina ASC;
+  `;
+  const result = await pool.query(query);
   return result.rows;
 };
