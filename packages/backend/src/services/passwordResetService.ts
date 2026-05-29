@@ -5,18 +5,18 @@ import jwt from 'jsonwebtoken';
 
 const RESET_TOKEN_SECRET = process.env.JWT_SECRET!;
 
-// Genera código de 6 dígitos, lo almacena en BD (invalida anteriores del mismo email)
 export const crearCodigoReset = async (email: string): Promise<string> => {
   const userResult = await pool.query(
     'SELECT id_usuario FROM USUARIOS WHERE email = $1 AND activo = TRUE',
     [email]
   );
   if (userResult.rows.length === 0) {
-    // No revelamos si el email existe o no (seguridad)
+
     return 'ok';
   }
 
   const codigo = crypto.randomInt(100000, 999999).toString();
+  const expiraEn = new Date(Date.now() + 15 * 60 * 1000); // 15 min
 
   await pool.query(
     `UPDATE CODIGOS_RESET_PASSWORD SET usado = TRUE WHERE email = $1 AND usado = FALSE`,
@@ -24,14 +24,14 @@ export const crearCodigoReset = async (email: string): Promise<string> => {
   );
 
   await pool.query(
-    `INSERT INTO CODIGOS_RESET_PASSWORD (email, codigo, expira_en) VALUES ($1, $2, NOW() + INTERVAL '15 minutes')`,
-    [email, codigo]
+    `INSERT INTO CODIGOS_RESET_PASSWORD (email, codigo, expira_en) VALUES ($1, $2, $3)`,
+    [email, codigo, expiraEn]
   );
 
   return codigo;
 };
 
-// Valida el código; si es correcto devuelve un reset_token JWT de 10 min
+
 export const validarCodigo = async (email: string, codigo: string): Promise<string | null> => {
   const result = await pool.query(
     `SELECT id FROM CODIGOS_RESET_PASSWORD
@@ -41,7 +41,6 @@ export const validarCodigo = async (email: string, codigo: string): Promise<stri
 
   if (result.rows.length === 0) return null;
 
-  // Marcar como usado para que no se pueda reutilizar
   await pool.query(
     `UPDATE CODIGOS_RESET_PASSWORD SET usado = TRUE WHERE id = $1`,
     [result.rows[0].id]
@@ -56,7 +55,6 @@ export const validarCodigo = async (email: string, codigo: string): Promise<stri
   return resetToken;
 };
 
-// Cambia la contraseña usando el reset_token
 export const cambiarPassword = async (resetToken: string, nuevaPassword: string): Promise<boolean> => {
   let payload: any;
   try {

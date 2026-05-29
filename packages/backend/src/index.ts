@@ -8,6 +8,7 @@ import fs from 'fs';
 import passport from 'passport';
 import './config/passport';
 import authRoutes from './routes/authRoutes';
+import { setupSwagger } from './config/swagger';
 import noticiasRoutes from './routes/noticiasRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import adminRoutes from './routes/adminRoutes';
@@ -21,6 +22,8 @@ app.use(passport.initialize());
 
 
 app.use('/temp', express.static(path.join(__dirname, '../uploads/temp')));
+
+setupSwagger(app);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/noticias', noticiasRoutes);
