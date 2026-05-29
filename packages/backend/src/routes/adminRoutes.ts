@@ -8,42 +8,42 @@ const router = Router();
 router.get(
   '/catalogos/inscripcion',
   authenticateJWT,
-  authorizeRoles('Administrador'),
+  authorizeRoles('admin'),
   obtenerCatalogosInscripcion
 );
 
 router.post(
   '/deportistas/inscribir',
   authenticateJWT,
-  authorizeRoles('Administrador'),
+  authorizeRoles('admin'),
   inscribirDeportista
 );
 
 router.get(
   '/roles',
   authenticateJWT,
-  authorizeRoles('Administrador'),
+  authorizeRoles('admin'),
   listarRoles
 );
 
 router.post(
   '/usuarios/registrar',
   authenticateJWT,
-  authorizeRoles('Administrador'),
+  authorizeRoles('admin'),
   crearUsuario
 );
 
 router.get(
   '/carreras',
   authenticateJWT,
-  authorizeRoles('Administrador'),
+  authorizeRoles('admin'),
   listarCarreras
 );
 
 router.get(
   '/deportistas',
   authenticateJWT,
-  authorizeRoles('Administrador'),
+  authorizeRoles('admin'),
   listarDeportistas
 );
 export default router;

@@ -66,11 +66,11 @@ export const login = async (req: Request, res: Response) => {
 
 export const register = async (req: Request, res: Response) => {
   const { 
-    nombres, ape_paterno, ape_materno, fecha_nacimiento, celular,
+    nombres, ape_paterno, ape_materno, fecha_nacimiento, celular, ci, complemento,
     email, password, id_rol
   } = req.body;
 
-  if (!nombres || !ape_paterno || !fecha_nacimiento || !celular || !email || !password || !id_rol) {
+  if (!nombres || !ape_paterno || !fecha_nacimiento || !celular || !ci || !email || !password || !id_rol) {
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
   }
 
@@ -80,9 +80,9 @@ export const register = async (req: Request, res: Response) => {
     await client.query('BEGIN');
 
     const personaResult = await client.query(`
-      INSERT INTO PERSONAS (nombres, ape_paterno, ape_materno, fecha_nacimiento, celular)
-      VALUES ($1, $2, $3, $4, $5) RETURNING id_persona
-    `, [nombres, ape_paterno, ape_materno || '', fecha_nacimiento, celular]);
+      INSERT INTO PERSONAS (nombres, ape_paterno, ape_materno, fecha_nacimiento, celular, ci, complemento)
+      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_persona
+    `, [nombres, ape_paterno, ape_materno || '', fecha_nacimiento, celular, ci, complemento || null]);
 
     const id_persona = personaResult.rows[0].id_persona;
 
@@ -102,7 +102,7 @@ export const register = async (req: Request, res: Response) => {
     console.error('Error en registro:', error);
     
     if (error.code === '23505') {
-      return res.status(400).json({ error: 'El correo electrónico ya está registrado' });
+      return res.status(400).json({ error: 'El correo electrónico o Carnet de Identidad ya está registrado' });
     }
     res.status(500).json({ error: 'Error interno al registrar usuario' });
   } finally {
